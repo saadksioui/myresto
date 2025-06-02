@@ -14,9 +14,141 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id               Int      @id @default(autoincrement())
-  email            String   @unique
-  mot_de_pass_hash String
-  créé_le        DateTime @default(now())
+model Utilisateurs {
+  id              String      @id @default(uuid())
+  email           String      @unique
+  mot_de_passe_hash String
+  créé_le         DateTime    @default(now())
+  userResto       UserResto[]
+}
+
+model Clients {
+  id        String      @id @default(uuid())
+  nom       String
+  téléphone String
+  adresse   String
+  créé_le   DateTime    @default(now())
+  commandes Commandes[]
+}
+
+model Restaurants {
+  id                    String       @id @default(uuid())
+  nom                  String
+  slug                 String        @unique
+  type                 String
+  logo_url             String
+  bannière_url         String
+  min_commande         Decimal
+  whatsapp_commande    Boolean
+  notifications_sonores Boolean
+  créé_le              DateTime      @default(now())
+
+  abonnements          Abonnements[]
+  menus                Menus[]
+  livreurs             Livreurs[]
+  commandes            Commandes[]
+  userResto            UserResto[]
+  profils              Profils?
+  lieux                Lieux[]
+  paiements            Paiements?
+}
+
+model Abonnements {
+  id             String   @id @default(uuid())
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String
+  type           String
+  statut         String
+  date_début     DateTime
+  date_fin       DateTime
+}
+
+model Rôles {
+  id             String   @id @default(uuid())
+  nom            String
+  permissions    String
+  userResto      UserResto[]
+}
+
+model UserResto {
+  user_id        String
+  restaurant_id  String
+  rôle_id        String
+
+  utilisateur    Utilisateurs @relation(fields: [user_id], references: [id])
+  restaurant     Restaurants  @relation(fields: [restaurant_id], references: [id])
+  rôle           Rôles        @relation(fields: [rôle_id], references: [id])
+
+  @@id([user_id, restaurant_id])
+}
+
+model Menus {
+  id             String   @id @default(uuid())
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String
+  nom            String
+  description    String
+  prix           Decimal
+  actif          Boolean
+}
+
+model Commandes {
+  id             String    @id @default(uuid())
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String
+  client         Clients     @relation(fields: [client_id], references: [id])
+  client_id      String
+  statut         String
+  total          Decimal
+  livreur        Livreurs?   @relation(fields: [livreur_id], references: [id])
+  livreur_id     String?
+}
+
+model Livreurs {
+  id             String    @id @default(uuid())
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String
+  nom            String
+  téléphone      String
+  commandes      Commandes[]
+}
+
+model Paiements {
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String   @id
+  livraison      Boolean
+  cb             Boolean
+  paypal         Boolean
+  email_paypal   String
+}
+
+model Profils {
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String   @id
+  nom_gérant     String
+  téléphone      String
+  email          String
+  langue         String
+  facebook       String
+  instagram      String
+}
+
+model Lieux {
+  id             String    @id @default(uuid())
+  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
+  restaurant_id  String
+  nom            String
+  whatsapp       String
+  adresse        String
+  horaires       Horaires[]
+}
+
+model Horaires {
+  id               String   @id @default(uuid())
+  lieu             Lieux    @relation(fields: [lieu_id], references: [id])
+  lieu_id          String
+  jour_semaine     Int
+  activé           Boolean
+  heure_ouverture  DateTime
+  heure_fermeture  DateTime
 }
