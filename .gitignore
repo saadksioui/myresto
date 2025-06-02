@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+#docker
+docker/pgadmin_data/
+docker/postgres_data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
