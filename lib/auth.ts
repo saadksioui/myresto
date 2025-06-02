@@ -1,18 +1,23 @@
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { compare } from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import bcrypt from "bcryptjs";
-import { prisma } from "./prisma";
+import prisma from "./prisma";
+
+// Extend NextAuth types to include custom properties
+import { DefaultSession } from "next-auth";
+import { getUserRestaurants } from "./restaurants";
 
 declare module "next-auth" {
   interface Session {
-    utilisateur: {
+    user: {
       id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      restaurants?: any[];
-    };
+      restaurants: any[];
+    } & DefaultSession["user"];
+  }
+  interface User {
+    id: string;
+    restaurants?: any[];
   }
 }
 
@@ -23,7 +28,6 @@ declare module "next-auth/jwt" {
   }
 }
 
-
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -31,68 +35,67 @@ export const authOptions: NextAuthOptions = {
       name: "Credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null;
+          throw new Error("Email et mot de passe requis");
         }
 
-        const utilisateur = await prisma.utilisateurs.findUnique({
-          where: {
-            email: credentials.email
-          }
+        const utilisateur = await prisma.utilisateur.findUnique({
+          where: { email: credentials.email },
         });
 
         if (!utilisateur) {
-          return null;
+          throw new Error("Utilisateur non trouvé");
         }
 
-        const isPasswordValid = await bcrypt.compare(
+        const passwordValid = await compare(
           credentials.password,
           utilisateur.mot_de_passe_hash
         );
 
-        if (!isPasswordValid) {
-          return null;
+        if (!passwordValid) {
+          throw new Error("Mot de passe incorrect");
         }
 
         return {
           id: utilisateur.id,
-          email: utilisateur.email
+          email: utilisateur.email,
+          name: `${utilisateur.prénom || ""} ${utilisateur.nom || ""}`.trim() || utilisateur.email,
         };
-      }
-    })
+      },
+    }),
   ],
   session: {
     strategy: "jwt",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-  pages: {
-    signIn: "/auth/login",
-    signOut: "/auth/logout",
-    error: "/auth/error",
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
   callbacks: {
-    async session({ session, token }) {
-      if (token && session.utilisateur) {
-        session.utilisateur.id = token.id as string;
-        session.utilisateur.restaurants = token.restaurants as any[];
-      }
-      return session;
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.restaurants = (user as any).restaurants;
+        token.email = user.email;
+
+        // Récupérer les restaurants et rôles de l'utilisateur
+        const restaurants = await getUserRestaurants(user.id);
+        token.restaurants = restaurants;
       }
       return token;
-    }
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.restaurants = token.restaurants as any[];
+      }
+      return session;
+    },
   },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
-export async function getServerSession() {
-  return await import("next-auth").then((mod) =>
-    mod.getServerSession(authOptions)
-  );
-}
+export default NextAuth(authOptions);

@@ -14,141 +14,227 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Utilisateurs {
-  id              String      @id @default(uuid())
-  email           String      @unique
+model Utilisateur {
+  id                String      @id @default(uuid())
+  email             String      @unique
   mot_de_passe_hash String
-  créé_le         DateTime    @default(now())
-  userResto       UserResto[]
+  nom               String?
+  prénom            String?
+  créé_le           DateTime    @default(now())
+  modifié_le        DateTime    @updatedAt
+  userResto         UserResto[]
 }
 
-model Clients {
-  id        String      @id @default(uuid())
-  nom       String
-  téléphone String
-  adresse   String
-  créé_le   DateTime    @default(now())
-  commandes Commandes[]
+model Client {
+  id          String      @id @default(uuid())
+  nom         String
+  téléphone   String
+  email       String?
+  adresse     String
+  créé_le     DateTime    @default(now())
+  modifié_le  DateTime    @updatedAt
+  commandes   Commande[]
 }
 
-model Restaurants {
-  id                    String       @id @default(uuid())
-  nom                  String
-  slug                 String        @unique
-  type                 String
-  logo_url             String
-  bannière_url         String
-  min_commande         Decimal
-  whatsapp_commande    Boolean
-  notifications_sonores Boolean
-  créé_le              DateTime      @default(now())
+model Restaurant {
+  id                     String        @id @default(uuid())
+  nom                    String
+  slug                   String        @unique
+  type                   String
+  logo_url               String?
+  bannière_url           String?
+  min_commande           Decimal?      @default(0)
+  whatsapp_commande      Boolean       @default(false)
+  notifications_sonores  Boolean       @default(true)
+  étape_configuration    Int           @default(1)
+  créé_le                DateTime      @default(now())
+  modifié_le             DateTime      @updatedAt
 
-  abonnements          Abonnements[]
-  menus                Menus[]
-  livreurs             Livreurs[]
-  commandes            Commandes[]
-  userResto            UserResto[]
-  profils              Profils?
-  lieux                Lieux[]
-  paiements            Paiements?
+  abonnement             Abonnement?
+  menus                  Menu[]
+  catégories             Catégorie[]
+  livreurs               Livreur[]
+  commandes              Commande[]
+  userResto              UserResto[]
+  profil                 Profil?
+  lieux                  Lieu[]
+  paiement               Paiement?
+  horaires               Horaire[]
 }
 
-model Abonnements {
-  id             String   @id @default(uuid())
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String
-  type           String
-  statut         String
-  date_début     DateTime
-  date_fin       DateTime
+model Abonnement {
+  id               String     @id @default(uuid())
+  restaurant       Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id    String     @unique
+  type             String     // 'gratuit', 'basique', 'premium'
+  statut           String     // 'actif', 'inactif', 'en_attente'
+  date_début       DateTime
+  date_fin         DateTime
+  créé_le          DateTime   @default(now())
+  modifié_le       DateTime   @updatedAt
 }
 
-model Rôles {
-  id             String   @id @default(uuid())
-  nom            String
-  permissions    String
-  userResto      UserResto[]
+model Rôle {
+  id            String      @id @default(uuid())
+  nom           String      @unique // 'propriétaire', 'gérant', 'employé'
+  permissions   String[]    // ['menus.lire', 'menus.écrire', 'commandes.lire', etc.]
+  userResto     UserResto[]
 }
 
 model UserResto {
   user_id        String
   restaurant_id  String
   rôle_id        String
+  créé_le        DateTime   @default(now())
 
-  utilisateur    Utilisateurs @relation(fields: [user_id], references: [id])
-  restaurant     Restaurants  @relation(fields: [restaurant_id], references: [id])
-  rôle           Rôles        @relation(fields: [rôle_id], references: [id])
+  utilisateur    Utilisateur @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  restaurant     Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  rôle           Rôle        @relation(fields: [rôle_id], references: [id])
 
   @@id([user_id, restaurant_id])
 }
 
-model Menus {
-  id             String   @id @default(uuid())
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String
-  nom            String
-  description    String
-  prix           Decimal
-  actif          Boolean
+model Catégorie {
+  id              String    @id @default(uuid())
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id   String
+  nom             String
+  description     String?
+  ordre           Int       @default(0)
+  actif           Boolean   @default(true)
+  menus           Menu[]
+  créé_le         DateTime  @default(now())
+  modifié_le      DateTime  @updatedAt
 }
 
-model Commandes {
-  id             String    @id @default(uuid())
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String
-  client         Clients     @relation(fields: [client_id], references: [id])
-  client_id      String
-  statut         String
-  total          Decimal
-  livreur        Livreurs?   @relation(fields: [livreur_id], references: [id])
-  livreur_id     String?
+model Menu {
+  id              String     @id @default(uuid())
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id   String
+  catégorie       Catégorie? @relation(fields: [catégorie_id], references: [id])
+  catégorie_id    String?
+  nom             String
+  description     String?
+  prix            Decimal
+  image_url       String?
+  actif           Boolean    @default(true)
+  options         Option[]
+  détails_commande DétailCommande[]
+  créé_le         DateTime   @default(now())
+  modifié_le      DateTime   @updatedAt
 }
 
-model Livreurs {
-  id             String    @id @default(uuid())
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String
-  nom            String
-  téléphone      String
-  commandes      Commandes[]
+model Option {
+  id              String    @id @default(uuid())
+  menu            Menu      @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  menu_id         String
+  nom             String
+  prix_supplément Decimal   @default(0)
+  créé_le         DateTime  @default(now())
+  modifié_le      DateTime  @updatedAt
 }
 
-model Paiements {
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String   @id
-  livraison      Boolean
-  cb             Boolean
-  paypal         Boolean
-  email_paypal   String
+model Commande {
+  id              String          @id @default(uuid())
+  restaurant      Restaurant      @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id   String
+  client          Client          @relation(fields: [client_id], references: [id])
+  client_id       String
+  statut          String          // 'en_attente', 'en_préparation', 'assignée', 'livrée', 'annulée'
+  total           Decimal
+  frais_livraison Decimal         @default(0)
+  notes           String?
+  mode_paiement   String?         // 'espèce', 'cb', 'paypal'
+  statut_paiement String?         // 'payé', 'en_attente', 'remboursé'
+  livreur         Livreur?        @relation(fields: [livreur_id], references: [id])
+  livreur_id      String?
+  détails         DétailCommande[]
+  créé_le         DateTime        @default(now())
+  modifié_le      DateTime        @updatedAt
 }
 
-model Profils {
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String   @id
-  nom_gérant     String
-  téléphone      String
-  email          String
-  langue         String
-  facebook       String
-  instagram      String
+model DétailCommande {
+  id              String    @id @default(uuid())
+  commande        Commande  @relation(fields: [commande_id], references: [id], onDelete: Cascade)
+  commande_id     String
+  menu            Menu      @relation(fields: [menu_id], references: [id])
+  menu_id         String
+  quantité        Int
+  prix_unitaire   Decimal
+  options         String?   // Stockées en JSON
+  notes           String?
+  créé_le         DateTime  @default(now())
+  modifié_le      DateTime  @updatedAt
 }
 
-model Lieux {
-  id             String    @id @default(uuid())
-  restaurant     Restaurants @relation(fields: [restaurant_id], references: [id])
-  restaurant_id  String
-  nom            String
-  whatsapp       String
-  adresse        String
-  horaires       Horaires[]
+model Livreur {
+  id              String     @id @default(uuid())
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id   String
+  nom             String
+  téléphone       String
+  email           String?
+  actif           Boolean    @default(true)
+  commandes       Commande[]
+  créé_le         DateTime   @default(now())
+  modifié_le      DateTime   @updatedAt
 }
 
-model Horaires {
-  id               String   @id @default(uuid())
-  lieu             Lieux    @relation(fields: [lieu_id], references: [id])
-  lieu_id          String
-  jour_semaine     Int
-  activé           Boolean
-  heure_ouverture  DateTime
-  heure_fermeture  DateTime
+model Paiement {
+  restaurant_id   String     @id
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  livraison       Boolean    @default(true)
+  frais_livraison Decimal    @default(0)
+  min_commande    Decimal    @default(0)
+  espèce          Boolean    @default(true)
+  cb              Boolean    @default(false)
+  paypal          Boolean    @default(false)
+  email_paypal    String?
+  clé_api_cb      String?
+  créé_le         DateTime   @default(now())
+  modifié_le      DateTime   @updatedAt
+}
+
+model Profil {
+  restaurant_id   String     @id
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  nom_gérant      String?
+  téléphone       String?
+  email           String?
+  langue          String     @default("fr")
+  facebook        String?
+  instagram       String?
+  site_web        String?
+  créé_le         DateTime   @default(now())
+  modifié_le      DateTime   @updatedAt
+}
+
+model Lieu {
+  id              String     @id @default(uuid())
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id   String
+  nom             String
+  whatsapp        String?
+  adresse         String
+  latitude        Float?
+  longitude       Float?
+  principal       Boolean    @default(false)
+  actif           Boolean    @default(true)
+  horaires        Horaire[]
+  créé_le         DateTime   @default(now())
+  modifié_le      DateTime   @updatedAt
+}
+
+model Horaire {
+  id               String     @id @default(uuid())
+  restaurant       Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  restaurant_id    String
+  lieu             Lieu?      @relation(fields: [lieu_id], references: [id], onDelete: Cascade)
+  lieu_id          String?
+  jour_semaine     Int        // 0-6 (Dimanche-Samedi)
+  activé           Boolean    @default(true)
+  heure_ouverture  String     // Format "HH:MM"
+  heure_fermeture  String     // Format "HH:MM"
+  créé_le          DateTime   @default(now())
+  modifié_le       DateTime   @updatedAt
 }

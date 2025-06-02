@@ -1,72 +1,58 @@
-import { NextRequest, NextResponse } from "next/server";
-import { registerSchema } from "@/lib/schemas/auth";
+import { NextRequest } from "next/server";
+import { schemaInscription } from "@/lib/validation";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { ZodError } from "zod";
-import { ApiError } from "@/lib/exceptions/api-error";
+import { apiHandler } from "@/lib/utils";
 
-export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
+export const POST = apiHandler(async (req: NextRequest) => {
+  const data = await req.json();
 
-    // Validate input
-    const { email, password } = registerSchema.parse(body);
+  // Valider les données
+  const validationResult = schemaInscription.safeParse(data);
 
-    // Check if utilisateur already exists
-    const existingUtilisateur = await prisma.utilisateurs.findUnique({
-      where: { email },
-    });
-
-    if (existingUtilisateur) {
-      throw ApiError.conflict("user with this email already exists");
-    }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create utilisateur
-    const utilisateur = await prisma.utilisateurs.create({
-      data: {
-        email,
-        mot_de_passe_hash: hashedPassword
-      },
-    });
-
-    // Remove password from response
-    const { mot_de_passe_hash: _, ...utilisateurWithoutPassword } = utilisateur;
-
-    return NextResponse.json(
-      {
-        message: "user registered successfully",
-        utilisateur: utilisateurWithoutPassword
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        {
-          message: "Validation error",
-          errors: error.errors
-        },
-        { status: 400 }
-      );
-    }
-
-    if (error instanceof ApiError) {
-      return NextResponse.json(
-        {
-          message: error.message,
-          errors: error.errors
-        },
-        { status: error.statusCode }
-      );
-    }
-
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 500 }
+  if (!validationResult.success) {
+    return Response.json(
+      { error: validationResult.error.issues[0].message },
+      { status: 400 }
     );
   }
-}
+
+  const { email, mot_de_passe, nom, prénom } = validationResult.data;
+
+  // Vérifier si l'utilisateur existe déjà
+  const utilisateurExistant = await prisma.utilisateur.findUnique({
+    where: { email },
+  });
+
+  if (utilisateurExistant) {
+    return Response.json(
+      { error: "Cet email est déjà utilisé" },
+      { status: 400 }
+    );
+  }
+
+  // Hasher le mot de passe
+  const mot_de_passe_hash = await bcrypt.hash(mot_de_passe, 10);
+
+  // Créer l'utilisateur
+  const utilisateur = await prisma.utilisateur.create({
+    data: {
+      email,
+      mot_de_passe_hash,
+      nom,
+      prénom,
+    },
+  });
+
+  // Remove password from response
+  const { mot_de_passe_hash: _, ...utilisateurWithoutPassword } = utilisateur;
+
+  return Response.json(
+    {
+      success: true,
+      id: utilisateur.id,
+      email: utilisateur.email
+    },
+    { status: 201 }
+  );
+});
