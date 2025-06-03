@@ -121,7 +121,7 @@ export const POST = apiHandler(async (req: NextRequest) => {
         type: "gratuit",
         statut: "actif",
         date_début: new Date(),
-        date_fin: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // +30 jours
+        date_fin: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 jours
       },
     });
 
