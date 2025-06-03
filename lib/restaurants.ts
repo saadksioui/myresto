@@ -1,5 +1,11 @@
 import prisma from "./prisma";
 
+interface UserRestaurantAccess {
+  hasAccess: boolean;
+  rôle: string | null;
+  permissions: string[];
+}
+
 // Récupérer tous les restaurants d'un utilisateur avec leurs rôles
 export async function getUserRestaurants(userId: string) {
   const userRestos = await prisma.userResto.findMany({
@@ -23,7 +29,7 @@ export async function getUserRestaurants(userId: string) {
 }
 
 // Vérifier si un utilisateur a accès à un restaurant spécifique
-export async function checkUserRestaurantAccess(userId: string, restaurantId: string) {
+export async function checkUserRestaurantAccess(userId: string, restaurantId: string): Promise<UserRestaurantAccess> {
   const userResto = await prisma.userResto.findUnique({
     where: {
       user_id_restaurant_id: {
