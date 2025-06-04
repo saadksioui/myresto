@@ -27,8 +27,7 @@ export const GET = apiHandler(async (
     throw new ApiError("Accès refusé", 403);
   }
 
-  if (!access.permissions.includes(PERMISSIONS.COMMANDE.LIRE) &&
-      access.rôle !== "propriétaire") {
+  if (!access.permissions.includes(PERMISSIONS.COMMANDE.LIRE)) {
     throw new ApiError("Permission refusée", 403);
   }
 
@@ -77,8 +76,7 @@ export const PATCH = apiHandler(async (
     throw new ApiError("Accès refusé", 403);
   }
 
-  if (!access.permissions.includes(PERMISSIONS.COMMANDE.MODIFIER) &&
-      access.rôle !== "propriétaire") {
+  if (!access.permissions.includes(PERMISSIONS.COMMANDE.MODIFIER)) {
     throw new ApiError("Permission refusée", 403);
   }
 

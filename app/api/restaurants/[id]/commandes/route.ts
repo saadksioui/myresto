@@ -27,8 +27,7 @@ export const GET = apiHandler(async (
     throw new ApiError("Accès refusé", 403);
   }
 
-  if (!access.permissions.includes(PERMISSIONS.COMMANDE.LIRE) &&
-    access.rôle !== "propriétaire") {
+  if (!access.permissions.includes(PERMISSIONS.COMMANDE.LIRE)) {
     throw new ApiError("Permission refusée", 403);
   }
 
