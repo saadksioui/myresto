@@ -189,4 +189,4 @@ export const DELETE = apiHandler( async (
   });
 
   return Response.json({ success: true });
-})
+}) 
