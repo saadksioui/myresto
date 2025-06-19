@@ -20,6 +20,7 @@ export async function getUserRestaurants(userId: string) {
     id: ur.restaurant.id,
     nom: ur.restaurant.nom,
     slug: ur.restaurant.slug,
+    logo: ur.restaurant.logo_url,
     rôle: {
       id: ur.rôle.id,
       nom: ur.rôle.nom,
