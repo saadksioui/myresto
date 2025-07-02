@@ -34,7 +34,7 @@ const CreationProcessForRestaurant = () => {
   // Redirect after success
   if (currentStep === 3 && restaurantId) {
     setTimeout(() => {
-      router.push(`/dashboard?restaurant=${restaurantId}`);
+      router.push(`/dashboard`);
     }, 1500);
   }
 

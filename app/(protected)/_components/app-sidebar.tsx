@@ -9,12 +9,13 @@ import {
   Settings as SettingsIcon,
   Plus,
   Menu as MenuIcon,
-  X,
   Sidebar,
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import CreationProcessForRestaurant from "./CreationProcessForRestaurant";
 
 interface Restaurant {
   id: string;
@@ -28,6 +29,7 @@ const AppSidebar = () => {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [menuUrl, setMenuUrl] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showCreationModal, setShowCreationModal] = useState(false);
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
@@ -62,6 +64,11 @@ const AppSidebar = () => {
 
   return (
     <>
+      <Dialog open={showCreationModal} onOpenChange={setShowCreationModal}>
+        <DialogContent className="max-w-2xl p-0">
+          <CreationProcessForRestaurant />
+        </DialogContent>
+      </Dialog>
       {/* Small Sidebar */}
       <div className="w-20 bg-gray-900 flex flex-col items-center py-4 gap-3 z-20">
         <button
@@ -76,8 +83,8 @@ const AppSidebar = () => {
             key={restaurant.id}
             onClick={() => setSelectedRestaurant(restaurant.id)}
             className={`w-12 h-12 rounded-full overflow-hidden group relative transition-all duration-200 ${selectedRestaurant === restaurant.id
-                ? "rounded-[16px] bg-blue-500"
-                : "hover:rounded-[16px] hover:bg-blue-500"
+              ? "rounded-[16px] bg-blue-500"
+              : "hover:rounded-[16px] hover:bg-blue-500"
               }`}
           >
             <img
@@ -91,7 +98,9 @@ const AppSidebar = () => {
           </button>
         ))}
 
-        <button className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white">
+        <button className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white"
+          onClick={() => setShowCreationModal(true)}
+        >
           <Plus size={24} />
           <div className="absolute left-full ml-3 px-2 py-1 bg-black text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
             Add Restaurant
@@ -142,8 +151,8 @@ const AppSidebar = () => {
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive(item.href)
-                  ? "bg-blue-100 text-blue-600 font-semibold"
-                  : "text-gray-700 hover:bg-gray-100"
+                ? "bg-blue-100 text-blue-600 font-semibold"
+                : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
               <item.icon size={20} />
