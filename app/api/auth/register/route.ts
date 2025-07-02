@@ -1,3 +1,4 @@
+import { RÔLE_PERMISSIONS } from '@/lib/rbac';
 import { NextRequest } from "next/server";
 import { schemaInscription } from "@/lib/validation";
 import { prisma } from "@/lib/prisma";
@@ -42,6 +43,55 @@ export const POST = apiHandler(async (req: NextRequest) => {
       nom,
       prénom,
     },
+  });
+
+  // Trouver le rôle de propriétaire
+    let rôlePropriétaire = await prisma.rôle.findFirst({
+      where: { nom: "propriétaire" },
+    });
+
+    // Créer le rôle propriétaire s'il n'existe pas
+    if (!rôlePropriétaire) {
+      rôlePropriétaire = await prisma.rôle.create({
+        data: {
+          nom: "propriétaire",
+          permissions: RÔLE_PERMISSIONS.PROPRIÉTAIRE,
+        },
+      });
+    }
+    // Créer le restaurant et associer l'utilisateur
+  const restaurant = await prisma.$transaction(async (tx) => {
+    // Créer le restaurant
+    const newRestaurant = await tx.restaurant.create({
+      data: {
+        nom: "Nouveau Restaurant",
+        slug: `restaurant-${Date.now()}`,
+        type: "standard", // Remplacez par la valeur par défaut ou appropriée
+        étape_configuration: 1,
+      },
+    });
+
+    // Associer l'utilisateur au restaurant avec le rôle propriétaire
+    await tx.userResto.create({
+      data: {
+        user_id: utilisateur.id,
+        restaurant_id: newRestaurant.id,
+        rôle_id: rôlePropriétaire.id,
+      },
+    });
+
+    // Créer un abonnement gratuit par défaut
+    await tx.abonnement.create({
+      data: {
+        restaurant_id: newRestaurant.id,
+        type: "gratuit",
+        statut: "actif",
+        date_début: new Date(),
+        date_fin: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 jours
+      },
+    });
+
+    return newRestaurant;
   });
 
   // Remove password from response

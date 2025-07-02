@@ -9,6 +9,21 @@ import {
   schemaConfigurationÉtape3
 } from "@/lib/validation";
 import { PERMISSIONS } from "@/lib/rbac";
+import cloudinary from "cloudinary";
+
+cloudinary.v2.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
+});
+
+async function uploadToCloudinary(file: string, folder: string) {
+  const res = await cloudinary.v2.uploader.upload(file, {
+    folder,
+    resource_type: "image",
+  });
+  return res.secure_url;
+}
 
 interface Etape1 {
   nom: string;
@@ -180,11 +195,14 @@ export const PUT = apiHandler(async (
   } else if (étape === 3) {
     const { logo_url, bannière_url } = validationResult.data as Etape3;
 
+    const logo = await uploadToCloudinary(logo_url, `restaurants/${restaurantId}/logo_url`);
+    const bannière = await uploadToCloudinary(bannière_url, `restaurants/${restaurantId}/bannière_url`);
+
     updatedRestaurant = await prisma.restaurant.update({
       where: { id: restaurantId },
       data: {
-        logo_url,
-        bannière_url,
+        logo_url: logo,
+        bannière_url: bannière,
         étape_configuration: 4, // Configuration terminée
       },
     });

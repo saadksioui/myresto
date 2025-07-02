@@ -1,20 +1,20 @@
 "use client"
 import { useState } from "react";
 
-const Etape1Form = ({ onSuccess }: { onSuccess: () => void }) => {
+const Etape1Form = ({ onSuccess, restaurantId }: { onSuccess: () => void, restaurantId: string }) => {
   const [nom, setNom] = useState("");
   const [type, setType] = useState("");
   const [slug, setSlug] = useState("");
   const [error, setError] = useState("");
 
-  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    const res = await fetch(`/api/restaurants`, {
-      method: "POST",
+    const res = await fetch(`/api/restaurants/${restaurantId}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         étape: 1,
