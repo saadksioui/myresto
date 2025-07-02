@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
@@ -6,14 +7,14 @@ import {
   ShoppingBag,
   Bike,
   Settings as SettingsIcon,
+  Plus,
   Menu as MenuIcon,
   X,
-  Plus,
-} from 'lucide-react';
+  Sidebar,
+} from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarTrigger } from "@/components/ui/sidebar";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 interface Restaurant {
   id: string;
@@ -26,6 +27,7 @@ const AppSidebar = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [menuUrl, setMenuUrl] = useState<string | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const pathname = usePathname();
 
   const isActive = (path: string) => pathname === path;
@@ -34,7 +36,6 @@ const AppSidebar = () => {
     const fetchRestaurants = async () => {
       const res = await fetch("/api/restaurants");
       const data = await res.json();
-      // Support both { restaurants: [...] } and [...] directly
       const list = Array.isArray(data.restaurants)
         ? data.restaurants
         : Array.isArray(data)
@@ -59,19 +60,24 @@ const AppSidebar = () => {
     fetchQRCode();
   }, [selectedRestaurant]);
 
-
   return (
-    <div className="flex h-screen">
+    <>
       {/* Small Sidebar */}
-      <div className="w-[72px] bg-gray-900 flex-shrink-0 h-full flex flex-col items-center py-4 gap-3">
-        <SidebarTrigger className="text-white" />
+      <div className="w-20 bg-gray-900 flex flex-col items-center py-4 gap-3 z-20">
+        <button
+          className="text-white p-2 rounded-md hover:bg-gray-800"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        >
+          <Sidebar size={20} />
+        </button>
+
         {restaurants.map((restaurant) => (
           <button
             key={restaurant.id}
             onClick={() => setSelectedRestaurant(restaurant.id)}
             className={`w-12 h-12 rounded-full overflow-hidden group relative transition-all duration-200 ${selectedRestaurant === restaurant.id
-              ? "rounded-[16px] bg-blue-500"
-              : "hover:rounded-[16px] hover:bg-blue-500"
+                ? "rounded-[16px] bg-blue-500"
+                : "hover:rounded-[16px] hover:bg-blue-500"
               }`}
           >
             <img
@@ -85,9 +91,7 @@ const AppSidebar = () => {
           </button>
         ))}
 
-        <button
-          className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white"
-        >
+        <button className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white">
           <Plus size={24} />
           <div className="absolute left-full ml-3 px-2 py-1 bg-black text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
             Add Restaurant
@@ -96,92 +100,62 @@ const AppSidebar = () => {
       </div>
 
       {/* Expanded Sidebar */}
-      <Sidebar>
-        <SidebarHeader>
-          <div className="p-6 border-b">
-            <div className="flex items-center space-x-3">
-              <Image
-                src={restaurants.find((r) => r.id === selectedRestaurant)?.logo_url || "/placeholder.png"}
-                alt={restaurants.find((r) => r.id === selectedRestaurant)?.nom || "Restaurant logo"}
-                className="w-10 h-10 rounded-full object-cover"
-                width={40}
-                height={40}
-              />
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {restaurants.find((r) => r.id === selectedRestaurant)?.nom}
-                </h2>
-                <p className="text-xs text-gray-500">Restaurant Dashboard</p>
-              </div>
+      <div
+        className={`w-64 h-full bg-white shadow-md flex flex-col z-10 transition-transform duration-300 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0 hidden"
+          }`}
+      >
+        {/* Header */}
+        <div className="p-6 border-b">
+          <div className="flex items-center space-x-3">
+            <Image
+              src={
+                restaurants.find((r) => r.id === selectedRestaurant)?.logo_url ||
+                "/placeholder.png"
+              }
+              alt={
+                restaurants.find((r) => r.id === selectedRestaurant)?.nom ||
+                "Restaurant logo"
+              }
+              className="w-10 h-10 rounded-full object-cover"
+              width={40}
+              height={40}
+            />
+            <div>
+              <h2 className="text-lg font-semibold">
+                {restaurants.find((r) => r.id === selectedRestaurant)?.nom}
+              </h2>
+              <p className="text-xs text-gray-500">Restaurant Dashboard</p>
             </div>
           </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <nav className="p-4 space-y-1">
-            <Link
-              href="/"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive("/")
-                ? "bg-red-100 text-red-600 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <LayoutDashboard size={20} />
-              <span>Dashboard</span>
-            </Link>
+        </div>
 
+        {/* Navigation */}
+        <div className="p-4 space-y-1 flex-1 overflow-auto">
+          {[
+            { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+            { href: "/menu", icon: UtensilsCrossed, label: "Menu" },
+            { href: "/orders", icon: ShoppingBag, label: "Orders" },
+            { href: "/livreurs", icon: Bike, label: "Livreurs" },
+            { href: "/settings", icon: SettingsIcon, label: "Settings" },
+          ].map((item) => (
             <Link
-              href="/menu"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive("/menu")
-                ? "bg-red-100 text-red-600 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive(item.href)
+                  ? "bg-blue-100 text-blue-600 font-semibold"
+                  : "text-gray-700 hover:bg-gray-100"
                 }`}
             >
-              <UtensilsCrossed size={20} />
-              <span>Menu</span>
+              <item.icon size={20} />
+              <span>{item.label}</span>
             </Link>
+          ))}
+        </div>
 
-            <Link
-              href="/orders"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive("/orders")
-                ? "bg-red-100 text-red-600 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <ShoppingBag size={20} />
-              <span>Orders</span>
-            </Link>
-
-            <Link
-              href="/livreurs"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive("/livreurs")
-                ? "bg-red-100 text-red-600 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <Bike size={20} />
-              <span>Livreurs</span>
-            </Link>
-
-            <Link
-              href="/settings"
-              className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive("/settings")
-                ? "bg-red-100 text-red-600 font-semibold"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <SettingsIcon size={20} />
-              <span>Settings</span>
-            </Link>
-          </nav>
-        </SidebarContent>
-        <SidebarFooter className="w-full flex flex-col items-center justify-center mb-10">
+        {/* Footer */}
+        <div className="w-full flex flex-col items-center justify-center mb-6">
           {qrCode && (
-            <Image
-              src={qrCode}
-              alt="QR Code"
-              width={100}
-              height={100}
-            />
+            <Image src={qrCode} alt="QR Code" width={100} height={100} />
           )}
           {menuUrl && (
             <Link
@@ -190,13 +164,14 @@ const AppSidebar = () => {
               rel="noopener noreferrer"
               className="text-sm flex items-center gap-2 px-3 py-2 mt-2 rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              <span>Voir le menu</span>
+              Voir le menu
             </Link>
           )}
-        </SidebarFooter>
-      </Sidebar>
-    </div>
+        </div>
+      </div>
+    </>
   );
+
 };
 
 export default AppSidebar;
