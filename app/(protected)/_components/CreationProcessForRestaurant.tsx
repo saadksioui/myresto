@@ -1,14 +1,14 @@
 "use client";
 import { useState } from "react";
-import Etape1Form from "./forms/Etape1Form";
-import Etape2Form from "./forms/Etape2Form";
-import Etape3Form from "./forms/Etape3Form";
 import { useRouter } from "next/navigation";
+import Step1 from "./forms/new-restaurant-forms/Step1";
+import Step2 from "./forms/new-restaurant-forms/Step2";
+import Step3 from "./forms/new-restaurant-forms/Step3";
 
 const steps = [
-  { label: "Informations", component: Etape1Form },
-  { label: "Localisation & WhatsApp", component: Etape2Form },
-  { label: "Logo & Bannière", component: Etape3Form },
+  { label: "Informations", component: Step1 },
+  { label: "Localisation & WhatsApp", component: Step2 },
+  { label: "Logo & Bannière", component: Step3 },
 ];
 
 const CreationProcessForRestaurant = () => {
@@ -16,16 +16,16 @@ const CreationProcessForRestaurant = () => {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const router = useRouter();
 
-  // Called after Etape1Form success, expects restaurantId from API
+  // Called after Step1 success, expects restaurantId from API
   const handleEtape1Success = (id: string) => {
     setRestaurantId(id);
     setCurrentStep(1);
   };
 
-  // Called after Etape2Form success
+  // Called after Step2 success
   const handleEtape2Success = () => setCurrentStep(2);
 
-  // Called after Etape3Form success
+  // Called after Step3 success
   const handleEtape3Success = () => setCurrentStep(3);
 
   // Progress bar width
@@ -59,23 +59,23 @@ const CreationProcessForRestaurant = () => {
       </div>
 
       {/* Step Forms */}
-      {/* {currentStep === 0 && (
-        <Etape1Form
+      {currentStep === 0 && (
+        <Step1
           onSuccess={handleEtape1Success}
         />
       )}
       {currentStep === 1 && restaurantId && (
-        <Etape2Form
+        <Step2
           onSuccess={handleEtape2Success}
           restaurantId={restaurantId}
         />
       )}
       {currentStep === 2 && restaurantId && (
-        <Etape3Form
+        <Step3
           onSuccess={handleEtape3Success}
           restaurantId={restaurantId}
         />
-      )} */}
+      )}
       {currentStep === 3 && (
         <div className="text-center py-12">
           <div className="text-2xl font-bold text-green-600 mb-2">Restaurant créé avec succès !</div>

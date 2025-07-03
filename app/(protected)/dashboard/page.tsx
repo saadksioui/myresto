@@ -4,9 +4,9 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import Etape1Form from "../_components/forms/Etape1Form";
-import Etape2Form from "../_components/forms/Etape2Form";
-import Etape3Form from "../_components/forms/Etape3Form";
+import Etape1Form from "../_components/forms/first-restaurant-forms/Etape1Form";
+import Etape2Form from "../_components/forms/first-restaurant-forms/Etape2Form";
+import Etape3Form from "../_components/forms/first-restaurant-forms/Etape3Form";
 import DashboardPage from "./DashboardPage";
 
 type Restaurant = {

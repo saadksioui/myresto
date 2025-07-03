@@ -54,12 +54,11 @@ const DashboardPage = () => {
           Welcome to your restaurant management dashboard {restaurant?.nom && `for ${restaurant.nom}`}
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Total Revenue"
           value={`${totalRevenue.toLocaleString()} Dhs`}
           icon={<DollarSign size={18} className="text-[#2563EB]" />}
-          trend={8.2}
           colorClass="text-[#2563EB]"
         />
 
@@ -67,7 +66,6 @@ const DashboardPage = () => {
           title="Total Commande"
           value={`${totalCommandes} Commande`}
           icon={<ShoppingBag size={18} className="text-[#F97316]" />}
-          trend={12.5}
           colorClass="text-[#F97316]"
         />
 
@@ -75,7 +73,6 @@ const DashboardPage = () => {
           title="Active Menu Items"
           value={`${activeMenuItems} Items`}
           icon={<UtensilsCrossed size={18} className="text-[#3B82F6]" />}
-          trend={-2.4}
           colorClass="text-[#3B82F6]"
         />
 
@@ -83,7 +80,6 @@ const DashboardPage = () => {
           title="Delivery Personnel"
           value={`${activeLivreurs} Livreurs`}
           icon={<Bike size={18} className="text-[#F59E0B]" />}
-          trend={0}
           colorClass="text-[#F59E0B]"
         />
       </div>
