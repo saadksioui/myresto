@@ -16,6 +16,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import CreationProcessForRestaurant from "./CreationProcessForRestaurant";
+import { useRestaurant } from "@/context/RestaurantContext";
 
 interface Restaurant {
   id: string;
@@ -25,10 +26,10 @@ interface Restaurant {
 
 const AppSidebar = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [selectedRestaurant, setSelectedRestaurant] = useState<string | null>(null);
+  const { selectedRestaurant, setSelectedRestaurant } = useRestaurant();
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [menuUrl, setMenuUrl] = useState<string | null>(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const pathname = usePathname();
 
@@ -148,7 +149,7 @@ const AppSidebar = () => {
             { href: "/settings", icon: SettingsIcon, label: "Settings" },
           ].map((item) => (
             <Link
-              key={item.href}
+              key={`${item.href}?restaurant=${selectedRestaurant}`}
               href={item.href}
               className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${isActive(item.href)
                 ? "bg-blue-100 text-blue-600 font-semibold"
