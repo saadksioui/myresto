@@ -11,9 +11,12 @@ const steps = [
   { label: "Logo & Bannière", component: Step3 },
 ];
 
-const CreationProcessForRestaurant = ({currentStepResto}: {currentStepResto: number}) => {
+const CreationProcessForRestaurant = ({
+  currentStepResto = 0,
+  restId,
+}: { currentStepResto?: number; restId?: string }) => {
   const [currentStep, setCurrentStep] = useState(currentStepResto || 0);
-  const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [restaurantId, setRestaurantId] = useState<string | null>(restId || null);
   const router = useRouter();
 
   // Called after Step1 success, expects restaurantId from API
@@ -29,7 +32,7 @@ const CreationProcessForRestaurant = ({currentStepResto}: {currentStepResto: num
   const handleEtape3Success = () => setCurrentStep(3);
 
   // Progress bar width
-  const progress = ((currentStep) / (steps.length - 1)) * 100;
+  const progress = currentStep < 4 && ((currentStep) / (steps.length - 1)) * 100;
 
   // Redirect after success
   if (currentStep === 3 && restaurantId) {

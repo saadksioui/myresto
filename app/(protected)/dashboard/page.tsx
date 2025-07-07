@@ -1,8 +1,9 @@
 "use client";
 import { useRestaurant } from "@/context/RestaurantContext";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import DashboardPage from "./DashboardPage";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import CreationProcessForRestaurant from "../_components/CreationProcessForRestaurant";
 
 type Restaurant = {
@@ -34,7 +35,11 @@ const Dashboard = () => {
       {restaurant.étape_configuration < 4 && (
         <Dialog open>
           <DialogContent>
-            <CreationProcessForRestaurant currentStepResto={restaurant.étape_configuration} />
+
+          <DialogTitle asChild>
+            <VisuallyHidden>Add New Restaurant</VisuallyHidden>
+          </DialogTitle>
+            <CreationProcessForRestaurant currentStepResto={restaurant.étape_configuration} restId={selectedRestaurant || undefined}/>
           </DialogContent>
         </Dialog>
       )}

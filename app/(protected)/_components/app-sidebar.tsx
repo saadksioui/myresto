@@ -145,7 +145,7 @@ const AppSidebar = () => {
             </div>
             <button
             onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-            className="mt-4 w-32 p-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+            className="mt-4 w-fit p-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition"
           >
             <LogOut size={20}/>
           </button>
