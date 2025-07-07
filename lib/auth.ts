@@ -78,8 +78,7 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
 
         // Récupérer les restaurants et rôles de l'utilisateur
-        const restaurants = await getUserRestaurants(user.id);
-        token.restaurants = restaurants;
+        token.restaurants = await getUserRestaurants(user.id);
       }
       return token;
     },

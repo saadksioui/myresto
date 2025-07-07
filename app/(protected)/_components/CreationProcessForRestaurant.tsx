@@ -11,8 +11,8 @@ const steps = [
   { label: "Logo & Bannière", component: Step3 },
 ];
 
-const CreationProcessForRestaurant = () => {
-  const [currentStep, setCurrentStep] = useState(0);
+const CreationProcessForRestaurant = ({currentStepResto}: {currentStepResto: number}) => {
+  const [currentStep, setCurrentStep] = useState(currentStepResto || 0);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const router = useRouter();
 
@@ -39,21 +39,24 @@ const CreationProcessForRestaurant = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded shadow p-8">
+    <div className="w-full mx-auto bg-white rounded p-8">
       {/* Progress Bar */}
       <div className="mb-8">
         <div className="flex justify-between mb-2">
           {steps.map((step, idx) => (
-            <div key={step.label} className="flex-1 text-center text-xs font-semibold"
-              style={{ color: currentStep >= idx ? "#ef4444" : "#9ca3af" }}>
+            <div
+              key={step.label}
+              className="flex-1 text-center text-xs font-semibold"
+              style={{ color: currentStep >= idx ? "#3B82F6" : "#9ca3af" }}
+            >
               {step.label}
             </div>
           ))}
         </div>
         <div className="w-full h-2 bg-gray-200 rounded-full">
           <div
-            className="h-2 bg-red-500 rounded-full transition-all"
-            style={{ width: `${progress}%` }}
+            className="h-2 rounded-full transition-all"
+            style={{ width: `${progress}%`, backgroundColor: "#3B82F6" }}
           />
         </div>
       </div>

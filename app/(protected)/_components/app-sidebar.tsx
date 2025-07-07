@@ -10,13 +10,16 @@ import {
   Plus,
   Menu as MenuIcon,
   Sidebar,
+  LogOut,
 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import CreationProcessForRestaurant from "./CreationProcessForRestaurant";
 import { useRestaurant } from "@/context/RestaurantContext";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { signOut } from "next-auth/react";
 
 interface Restaurant {
   id: string;
@@ -66,8 +69,12 @@ const AppSidebar = () => {
   return (
     <>
       <Dialog open={showCreationModal} onOpenChange={setShowCreationModal}>
+
         <DialogContent className="max-w-2xl p-0">
-          <CreationProcessForRestaurant />
+          <DialogTitle asChild>
+            <VisuallyHidden>Add New Restaurant</VisuallyHidden>
+          </DialogTitle>
+          <CreationProcessForRestaurant currentStepResto={0}/>
         </DialogContent>
       </Dialog>
       {/* Small Sidebar */}
@@ -136,6 +143,12 @@ const AppSidebar = () => {
               </h2>
               <p className="text-xs text-gray-500">Restaurant Dashboard</p>
             </div>
+            <button
+            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+            className="mt-4 w-32 p-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+          >
+            <LogOut size={20}/>
+          </button>
           </div>
         </div>
 

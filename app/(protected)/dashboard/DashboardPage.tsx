@@ -3,6 +3,7 @@ import { useRestaurant } from "@/context/RestaurantContext";
 import { useEffect, useState } from "react";
 import KPICard from "../_components/dashboard/KPICard";
 import { Bike, DollarSign, ShoppingBag, UtensilsCrossed } from "lucide-react";
+import CreationProcessForRestaurant from "../_components/CreationProcessForRestaurant";
 
 interface Commande {
   total: number;
@@ -22,6 +23,7 @@ interface Livreur {
 interface Restaurant {
   id: string;
   nom: string;
+  étape_configuration: number;
   commande: Commande[];
   menu: MenuItem[];
   livreurs: Livreur[];
@@ -40,6 +42,10 @@ const DashboardPage = () => {
     };
     fetchRestaurant();
   }, [selectedRestaurant]);
+  console.log(restaurant);
+
+
+
 
   const totalRevenue = restaurant?.commande?.reduce((sum, commande) => sum + commande.total, 0) || 0;
   const totalCommandes = restaurant?.commande?.length || 0;
