@@ -5,6 +5,7 @@ import KPICard from "../_components/dashboard/KPICard";
 import { Bike, DollarSign, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import CreationProcessForRestaurant from "../_components/CreationProcessForRestaurant";
 import RevenueChart from "../_components/dashboard/RevenueChart";
+import RecentOrdersTable from "../_components/dashboard/RecentOrdersTable";
 
 interface Commande {
   total: number;
@@ -142,6 +143,9 @@ const DashboardPage = () => {
 
       {/* Revenue Chart */}
       <RevenueChart />
+
+      {/* Recent Orders Table */}
+      <RecentOrdersTable />
     </div>
   );
 };
