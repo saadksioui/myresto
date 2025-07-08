@@ -26,29 +26,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Check restaurant access for /restaurants/:id and /api/restaurants/:id
-  const restaurantRouteMatch = pathname.match(/\/restaurants?\/([^\/]+)/);
-  if (
-    pathname.match(/\/restaurant[s]?\/[^\/]+/) ||
-    pathname.match(/\/api\/restaurants?\/[^\/]+/)
-  ) {
-    if (restaurantRouteMatch) {
-      const restaurantId = restaurantRouteMatch[1];
-      const restaurants = Array.isArray(token.restaurants) ? token.restaurants : [];
-      // Accept both array of ids or array of objects with id
-      const hasAccess = restaurants.some((r: any) =>
-        typeof r === "string" ? r === restaurantId : r.id === restaurantId
-      );
-
-      if (!hasAccess) {
-        if (pathname.startsWith("/api/")) {
-          return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-        } else {
-          const url = new URL("/dashboard", req.url);
-          return NextResponse.redirect(url);
-        }
-      }
-    }
+  // Check restaurant access for /api/restaurants and /api/restaurants/:id
+  if (pathname === "/api/restaurants" && req.method === "PUT") {
+    // Allow all authenticated users to create a restaurant
+    return NextResponse.next();
   }
 
   return NextResponse.next();

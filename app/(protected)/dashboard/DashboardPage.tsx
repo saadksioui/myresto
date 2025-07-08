@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import KPICard from "../_components/dashboard/KPICard";
 import { Bike, DollarSign, ShoppingBag, UtensilsCrossed } from "lucide-react";
 import CreationProcessForRestaurant from "../_components/CreationProcessForRestaurant";
+import RevenueChart from "../_components/dashboard/RevenueChart";
 
 interface Commande {
   total: number;
@@ -44,13 +45,58 @@ const DashboardPage = () => {
   }, [selectedRestaurant]);
   console.log(restaurant);
 
-
-
-
   const totalRevenue = restaurant?.commande?.reduce((sum, commande) => sum + commande.total, 0) || 0;
   const totalCommandes = restaurant?.commande?.length || 0;
   const activeMenuItems = restaurant?.menu?.filter(item => item.actif).length || 0;
   const activeLivreurs = restaurant?.livreurs?.filter(livreur => livreur.actif).length || 0;
+
+  // Helper to calculate trend (current vs previous period)
+  function calculateTrend<T>(
+    current: T[],
+    previous: T[],
+    filterFn: (item: T) => boolean = () => true
+  ) {
+    const currentCount = current.filter(filterFn).length;
+    const previousCount = previous.filter(filterFn).length;
+    return currentCount - previousCount;
+  }
+
+  const getPreviousPeriodData = (items: any[], dateField: string) => {
+    // Example: previous period = 7 days ago
+    const now = new Date();
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(now.getDate() - 7);
+    return items.filter(
+      (item) =>
+        item[dateField] && new Date(item[dateField]) < oneWeekAgo
+    );
+  };
+
+  const commandes = restaurant?.commande || [];
+  const menuItems = restaurant?.menu || [];
+  const livreurs = restaurant?.livreurs || [];
+
+  // For this example, assume each item has a createdAt or lastActive field
+  const previousCommandes = getPreviousPeriodData(commandes, "createdAt");
+  const previousMenuItems = getPreviousPeriodData(menuItems, "createdAt");
+  const previousLivreurs = getPreviousPeriodData(livreurs, "lastActive");
+
+  // Trends
+  const revenueTrend =
+    commandes.reduce((sum, c) => sum + c.total, 0) -
+    previousCommandes.reduce((sum, c) => sum + c.total, 0);
+
+  const commandeTrend = calculateTrend(commandes, previousCommandes);
+  const menuTrend = calculateTrend(
+    menuItems,
+    previousMenuItems,
+    (item) => item.actif
+  );
+  const livreurTrend = calculateTrend(
+    livreurs,
+    previousLivreurs,
+    (livreur) => livreur.actif
+  );
 
   return (
     <div className="space-y-6">
@@ -66,6 +112,7 @@ const DashboardPage = () => {
           value={`${totalRevenue.toLocaleString()} Dhs`}
           icon={<DollarSign size={18} className="text-[#2563EB]" />}
           colorClass="text-[#2563EB]"
+          trend={revenueTrend}
         />
 
         <KPICard
@@ -73,6 +120,7 @@ const DashboardPage = () => {
           value={`${totalCommandes} Commande`}
           icon={<ShoppingBag size={18} className="text-[#F97316]" />}
           colorClass="text-[#F97316]"
+          trend={commandeTrend}
         />
 
         <KPICard
@@ -80,6 +128,7 @@ const DashboardPage = () => {
           value={`${activeMenuItems} Items`}
           icon={<UtensilsCrossed size={18} className="text-[#3B82F6]" />}
           colorClass="text-[#3B82F6]"
+          trend={menuTrend}
         />
 
         <KPICard
@@ -87,8 +136,12 @@ const DashboardPage = () => {
           value={`${activeLivreurs} Livreurs`}
           icon={<Bike size={18} className="text-[#F59E0B]" />}
           colorClass="text-[#F59E0B]"
+          trend={livreurTrend}
         />
       </div>
+
+      {/* Revenue Chart */}
+      <RevenueChart />
     </div>
   );
 };
