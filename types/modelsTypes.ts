@@ -90,7 +90,6 @@ export type Catégorie = {
 export type Menu = {
   id: string;
   restaurant_id: string;
-  restaurant: Restaurant;
   catégorie_id?: string | null;
   catégorie?: Catégorie | null;
   nom: string;

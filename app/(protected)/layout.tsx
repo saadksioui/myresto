@@ -1,4 +1,3 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/app-sidebar";
 import { RestaurantProvider } from "@/context/RestaurantContext";
 
@@ -14,7 +13,6 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         </main>
       </div>
     </RestaurantProvider>
-
   )
 };
 
