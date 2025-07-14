@@ -14,11 +14,16 @@ cloudinary.v2.config({
 });
 
 async function uploadToCloudinary(file: string, folder: string) {
-  const res = await cloudinary.v2.uploader.upload(file, {
-    folder,
-    resource_type: "image",
-  });
-  return res.secure_url;
+  try {
+    const res = await cloudinary.v2.uploader.upload(file, {
+      folder,
+      resource_type: "image",
+    });
+    return res.secure_url;
+  } catch (error: any) {
+    console.error("Cloudinary upload error:", error);
+    throw new ApiError("Erreur lors du téléchargement de l'image", 500);
+  }
 }
 
 // Récupérer tous les menus d'un restaurant
@@ -118,6 +123,12 @@ export const POST = apiHandler(async (
       actif,
       options
     } = validationResult.data;
+
+    console.log("Uploading image with:", {
+  image_url: image_url?.slice(0, 100), // show part of base64
+  type: typeof image_url,
+  length: image_url?.length,
+});
 
     const MenuImage = await uploadToCloudinary(image_url!, `restaurants/${restaurantId}/image_url`);
 

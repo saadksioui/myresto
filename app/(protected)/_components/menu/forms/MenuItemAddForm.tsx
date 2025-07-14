@@ -76,6 +76,8 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(restaurantId);
+
     const base64Image = menuImage ? await fileToBase64(menuImage) : null;
     setError("");
     setLoading(true);
@@ -90,8 +92,8 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
           description,
           prix,
           catégorie_id: catégorieId,
-          actif,
           image_url: base64Image,
+          actif,
           options,
         }),
       });
