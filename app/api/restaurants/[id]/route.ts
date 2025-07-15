@@ -67,6 +67,7 @@ export const GET = apiHandler(async (
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: restaurantId },
     include: {
+      menus: true,
       profil: true,
       abonnement: true,
       paiement: true,

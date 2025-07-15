@@ -27,7 +27,7 @@ interface Restaurant {
   nom: string;
   étape_configuration: number;
   commande: Commande[];
-  menu: MenuItem[];
+  menus: MenuItem[];
   livreurs: Livreur[];
 }
 
@@ -48,7 +48,7 @@ const DashboardPage = () => {
 
   const totalRevenue = restaurant?.commande?.reduce((sum, commande) => sum + commande.total, 0) || 0;
   const totalCommandes = restaurant?.commande?.length || 0;
-  const activeMenuItems = restaurant?.menu?.filter(item => item.actif).length || 0;
+  const activeMenuItems = restaurant?.menus?.filter(item => item.actif).length || 0;
   const activeLivreurs = restaurant?.livreurs?.filter(livreur => livreur.actif).length || 0;
 
   // Helper to calculate trend (current vs previous period)
@@ -74,7 +74,7 @@ const DashboardPage = () => {
   };
 
   const commandes = restaurant?.commande || [];
-  const menuItems = restaurant?.menu || [];
+  const menuItems = restaurant?.menus || [];
   const livreurs = restaurant?.livreurs || [];
 
   // For this example, assume each item has a createdAt or lastActive field
