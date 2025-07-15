@@ -98,6 +98,7 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         }),
       });
 
+
       const data = await res.json();
       setLoading(false);
       if (!res.ok) {
