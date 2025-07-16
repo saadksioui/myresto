@@ -145,6 +145,29 @@ export const PUT = apiHandler( async (
   });
 })
 
+export const PATCH = apiHandler(async (
+  req: NextRequest,
+  { params }: { params: { id: string; menuId: string } }
+) => {
+  const token = await getToken({ req });
+  if (!token) throw new ApiError("Non authentifié", 401);
+
+  const userId = token.id as string;
+  const { id: restaurantId, menuId } = params;
+
+  const access = await checkUserRestaurantAccess(userId, restaurantId);
+  if (!access.hasAccess) throw new ApiError("Accès refusé", 403);
+
+  const { actif } = await req.json();
+
+  const updated = await prisma.menu.update({
+    where: { id: menuId },
+    data: { actif },
+  });
+
+  return Response.json({ success: true, menu: updated });
+});
+
 // Supprimer un menu
 export const DELETE = apiHandler( async (
   req: NextRequest,
@@ -189,4 +212,4 @@ export const DELETE = apiHandler( async (
   });
 
   return Response.json({ success: true });
-}) 
+})

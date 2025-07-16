@@ -1,6 +1,9 @@
+"use client"
 import { Pencil, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Menu } from '@/types/modelsTypes';
 import Image from 'next/image';
+import { useState } from 'react';
+import MenuItemUpdateForm from './forms/MenuItemUpdateForm';
 
 type DisplayMenu = Menu & {
   catégorieNom?: string;
@@ -8,17 +11,17 @@ type DisplayMenu = Menu & {
 
 interface MenuItemCardProps {
   item: DisplayMenu;
-  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (id: string, status: boolean) => void;
 }
 
 const MenuItemCard: React.FC<MenuItemCardProps> = ({
   item,
-  onEdit,
   onDelete,
   onToggleStatus
 }) => {
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
+
   return (
     <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
       <div className="flex flex-col">
@@ -48,9 +51,8 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
               {item.catégorieNom}
             </span>
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              item.actif ? 'bg-green-100 text-green-800' : 'badge-errorbg-red-100 text-red-800'
-            }`}>
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.actif ? 'bg-green-100 text-green-800' : 'badge-errorbg-red-100 text-red-800'
+              }`}>
               {item.actif ? 'Active' : 'Inactive'}
             </span>
           </div>
@@ -58,7 +60,7 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
           <div className="flex justify-between items-center pt-3 border-t border-gray-100">
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => onEdit(item.id)}
+                onClick={() => setShowUpdateForm(true)}
                 className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
                 title="Edit item"
               >
@@ -76,20 +78,24 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({
 
             <button
               onClick={() => onToggleStatus(item.id, !item.actif)}
-              className={`p-2 ${
-                item.actif ? 'text-success-500' : 'text-gray-400'
-              } hover:text-primary-600 transition-colors`}
+              className={`p-2 ${item.actif ? 'text-success-500' : 'text-gray-400'
+                } hover:text-primary-600 transition-colors`}
               title={item.actif ? 'Set as inactive' : 'Set as active'}
             >
               {item.actif ? (
-                <ToggleRight size={22} />
+                <ToggleRight color='green' size={22} />
               ) : (
-                <ToggleLeft size={22} />
+                <ToggleLeft color='red' size={22} />
               )}
             </button>
           </div>
         </div>
       </div>
+      {
+        showUpdateForm && item && (
+          <MenuItemUpdateForm item={item} onCancel={() => setShowUpdateForm(false)} />
+        )
+      }
     </div>
   );
 };

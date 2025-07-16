@@ -11,7 +11,6 @@ const MenuPage = () => {
   const [categorieItems, setCategorieItems] = useState<Catégorie[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [statusFilter, setStatusFilter] = useState<string>("All");
@@ -38,10 +37,6 @@ const MenuPage = () => {
     setShowAddForm(true);
   };
 
-  const handleEditItem = (id: string) => {
-    setShowUpdateForm(true);
-    // Add logic to load the selected item if needed
-  };
 
   const handleDeleteItem = (id: string) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
@@ -52,9 +47,14 @@ const MenuPage = () => {
         }))
       );
     }
+
+    // Mettre à jour la base de données
+    fetch(`/api/restaurants/${selectedRestaurant}/menu/${id}`, {
+      method: "DELETE",
+    });
   };
 
-  const handleToggleStatus = (id: string, status: boolean) => {
+  const handleToggleStatus = async (id: string, status: boolean) => {
     setCategorieItems((prev) =>
       prev.map((cat) => ({
         ...cat,
@@ -63,6 +63,19 @@ const MenuPage = () => {
         ),
       }))
     );
+
+    // Mettre à jour le statut dans la base de données
+    try {
+      await fetch(`/api/restaurants/${selectedRestaurant}/menu/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ actif: status }),
+      });
+    } catch (err) {
+      console.error("Failed to update menu status", err);
+    }
   };
 
   const handleSearch = (query: string) => {
@@ -151,7 +164,6 @@ const MenuPage = () => {
               <MenuItemCard
                 key={menu.id}
                 item={{ ...menu, catégorieNom: cat.nom }} // optional: use `catégorieNom` for display only
-                onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
                 onToggleStatus={handleToggleStatus}
               />
