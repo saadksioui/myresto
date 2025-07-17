@@ -127,6 +127,7 @@ export type Commande = {
   statut_paiement?: string | null;
   livreur_id?: string | null;
   livreur?: Livreur | null;
+  totalAmount: string;
   détails: DétailCommande[];
   créé_le: string;
   modifié_le: string;

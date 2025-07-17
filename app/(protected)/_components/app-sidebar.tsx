@@ -96,7 +96,7 @@ const AppSidebar = () => {
               }`}
           >
             <img
-              src={restaurant.logo_url}
+              src={restaurant.logo_url || "/placeholder-restaurant.png"}
               alt={restaurant.nom}
               className="w-full h-full object-cover"
             />
@@ -127,7 +127,7 @@ const AppSidebar = () => {
             <Image
               src={
                 restaurants.find((r) => r.id === selectedRestaurant)?.logo_url ||
-                "/placeholder.png"
+                "/placeholder-restaurant.png"
               }
               alt={
                 restaurants.find((r) => r.id === selectedRestaurant)?.nom ||

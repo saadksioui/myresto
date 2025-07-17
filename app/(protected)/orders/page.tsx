@@ -1,5 +1,5 @@
 "use client";
-import { Commande } from "@/types/modelsTypes";
+import { Commande, Livreur } from "@/types/modelsTypes";
 import { OrderStatus } from "@/types/types";
 import { useEffect, useState } from "react";
 import OrderCard from "../_components/orders/OrderCard";
@@ -15,10 +15,11 @@ const OrdersPage = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`/api/restaurants/${selectedRestaurant}/orders`);
+        const res = await fetch(`/api/restaurants/${selectedRestaurant}/commandes`);
         if (!res.ok) throw new Error("Failed to fetch orders");
-        const data: { orders: Commande[] } = await res.json();
-        setOrders(data.orders);
+
+        const data = await res.json();
+        setOrders(data.commandes); // ✅ match what backend sends
       } catch (error) {
         console.error("Failed to fetch orders:", error);
       }
@@ -35,6 +36,10 @@ const OrdersPage = () => {
   const cancelledOrders = orders.filter((o) => o.statut === "annulée");
 
   const selectedOrder = orders.find((o) => o.id === selectedOrderId);
+
+  const availableLivreurs: Livreur[] = orders
+  .map(order => order.livreur)
+  .filter((livreur): livreur is Livreur => !!livreur && livreur.actif);
 
   const handleDragStart = (e: React.DragEvent, orderId: string) => {
     e.dataTransfer.setData("orderId", orderId);
@@ -58,7 +63,7 @@ const OrdersPage = () => {
     );
 
     // Optionally sync to backend
-    fetch(`/api/orders/${orderId}/status`, {
+    fetch(`/api/restaurants/${selectedRestaurant}/commandes/${orderId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ statut }),
@@ -87,7 +92,7 @@ const OrdersPage = () => {
     status: OrderStatus
   ) => (
     <div
-      className="kanban-column w-72 bg-white rounded shadow p-4"
+      className="bg-gray-100 rounded-lg p-4 min-w-[280px] flex-1 w-72 bg-white rounded shadow p-4"
       onDrop={(e) => handleDrop(e, status)}
       onDragOver={handleDragOver}
     >
@@ -131,6 +136,7 @@ const OrdersPage = () => {
         <OrderDetailsModal
           order={selectedOrder}
           onClose={() => setSelectedOrderId(null)}
+          availableLivreurs={availableLivreurs}
           onStatusChange={handleStatusChange}
           onAssignLivreur={handleAssignLivreur}
         />

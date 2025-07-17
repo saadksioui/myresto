@@ -23,13 +23,21 @@ export const GET = apiHandler(async (
   // Vérifier l'accès de l'utilisateur au restaurant
   const access = await checkUserRestaurantAccess(userId, restaurantId);
 
+  console.log(access);
+
+
   if (!access.hasAccess) {
     throw new ApiError("Accès refusé", 403);
   }
 
-  if (!access.permissions.includes(PERMISSIONS.COMMANDE.LIRE)) {
-    throw new ApiError("Permission refusée", 403);
-  }
+  if (
+  !access.permissions.includes(PERMISSIONS.COMMANDE.LIRE) &&
+  access.rôle !== "propriétaire" &&
+  access.rôle !== "livreur" &&
+  access.rôle !== "staff"
+) {
+  throw new ApiError("Permission refusée", 403);
+}
 
   const searchParams = req.nextUrl.searchParams;
   const statut = searchParams.get('statut');

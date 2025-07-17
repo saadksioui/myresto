@@ -76,7 +76,8 @@ export const PATCH = apiHandler(async (
     throw new ApiError("Accès refusé", 403);
   }
 
-  if (!access.permissions.includes(PERMISSIONS.COMMANDE.MODIFIER)) {
+  if (!access.permissions.includes(PERMISSIONS.COMMANDE.MODIFIER) &&
+      access.rôle !== "propriétaire" && access.rôle !== "livreur" && access.rôle !== "staff") {
     throw new ApiError("Permission refusée", 403);
   }
 
