@@ -1,7 +1,7 @@
 "use client";
 import { Catégorie, Menu } from "@/types/modelsTypes";
 import { useRestaurant } from "@/context/RestaurantContext";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import MenuItemForm from "../_components/menu/forms/MenuItemAddForm";
 import MenuItemCard from "../_components/menu/MenuItemCard";
 import { Filter, Plus, Search } from "lucide-react";
@@ -83,6 +83,25 @@ const MenuPage = () => {
   };
 
   const categoryOptions = ["All", ...categorieItems.map((c) => c.nom)];
+  const filteredItems = useMemo(() => {
+    return categorieItems
+      .flatMap((cat) =>
+        cat.menus.map((menu) => ({
+          ...menu,
+          catégorieNom: cat.nom,
+        }))
+      )
+      .filter((menu) => {
+        const matchesSearch = menu.nom.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = categoryFilter === "All" || menu.catégorieNom === categoryFilter;
+        const matchesStatus =
+          statusFilter === "All" ||
+          (statusFilter === "Active" && menu.actif) ||
+          (statusFilter === "Inactive" && !menu.actif);
+
+        return matchesSearch && matchesCategory && matchesStatus;
+      });
+  }, [categorieItems, searchQuery, categoryFilter, statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -154,26 +173,23 @@ const MenuPage = () => {
 
       {/* Menu Items Grid */}
       {loading ? (
+
         <div className="text-center py-12 bg-white rounded-lg shadow">
           <p className="text-gray-400">Loading menu items...</p>
-        </div>
-      ) : categorieItems.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categorieItems.flatMap((cat) =>
-            cat.menus.map((menu) => (
+        </div>) : filteredItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredItems.map((menu) => (
               <MenuItemCard
                 key={menu.id}
-                item={{ ...menu, catégorieNom: cat.nom }} // optional: use `catégorieNom` for display only
+                item={menu}
                 onDelete={handleDeleteItem}
-                onToggleStatus={handleToggleStatus}
-              />
-            ))
-          )}
-
-        </div>
-      ) : (
+                onToggleStatus={handleToggleStatus} />
+            ))}
+          </div>
+        ) : (
         <div className="text-center py-12 bg-white rounded-lg shadow">
           <p className="text-gray-500">No menu items found matching your criteria.</p>
+
         </div>
       )}
 

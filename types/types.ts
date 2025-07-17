@@ -1,1 +1,1 @@
-export type OrderStatus = 'Pending' | 'Preparing' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+export type OrderStatus = "en_attente" | "en_préparation" | "assignée" | "livrée" | "annulée";

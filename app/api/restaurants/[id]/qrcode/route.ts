@@ -43,7 +43,7 @@ export const GET = apiHandler(async (
 
   // Construire l'URL du menu
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-  const menuUrl = `${baseUrl}/r/${restaurant.slug}`;
+  const menuUrl = `${baseUrl}/restaurant/${restaurant.slug}`;
 
   // Générer le QR code
   const qrCodeDataUrl = await generateQRCode(menuUrl);
