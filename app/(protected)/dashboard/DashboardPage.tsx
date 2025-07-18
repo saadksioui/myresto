@@ -26,7 +26,7 @@ interface Restaurant {
   id: string;
   nom: string;
   étape_configuration: number;
-  commande: Commande[];
+  commandes: Commande[];
   menus: MenuItem[];
   livreurs: Livreur[];
 }
@@ -46,8 +46,8 @@ const DashboardPage = () => {
   }, [selectedRestaurant]);
   console.log(restaurant);
 
-  const totalRevenue = restaurant?.commande?.reduce((sum, commande) => sum + commande.total, 0) || 0;
-  const totalCommandes = restaurant?.commande?.length || 0;
+  const totalRevenue = restaurant?.commandes?.reduce((sum, commande) => sum + commande.total, 0) || 0;
+  const totalCommandes = restaurant?.commandes?.length || 0;
   const activeMenuItems = restaurant?.menus?.filter(item => item.actif).length || 0;
   const activeLivreurs = restaurant?.livreurs?.filter(livreur => livreur.actif).length || 0;
 
@@ -73,14 +73,14 @@ const DashboardPage = () => {
     );
   };
 
-  const commandes = restaurant?.commande || [];
+  const commandes = restaurant?.commandes || [];
   const menuItems = restaurant?.menus || [];
   const livreurs = restaurant?.livreurs || [];
 
   // For this example, assume each item has a createdAt or lastActive field
-  const previousCommandes = getPreviousPeriodData(commandes, "createdAt");
-  const previousMenuItems = getPreviousPeriodData(menuItems, "createdAt");
-  const previousLivreurs = getPreviousPeriodData(livreurs, "lastActive");
+  const previousCommandes = getPreviousPeriodData(commandes, "crée_le");
+  const previousMenuItems = getPreviousPeriodData(menuItems, "crée_le");
+  const previousLivreurs = getPreviousPeriodData(livreurs, "active");
 
   // Trends
   const revenueTrend =
