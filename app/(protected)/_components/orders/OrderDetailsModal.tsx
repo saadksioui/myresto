@@ -1,22 +1,26 @@
+"use client"
 import { Commande, Livreur } from "@/types/modelsTypes";
 import { OrderStatus } from "@/types/types";
 import { X, PhoneCall, Send } from 'lucide-react';
+import { useState } from "react";
 
 const OrderDetailsModal = ({
   order,
-  onStatusChange,
   availableLivreurs,
-  onAssignLivreur,
+  onUpdate,
   onClose
 }: {
   order: Commande;
   onClose: () => void;
   availableLivreurs: Livreur[];
-  onStatusChange: (orderId: string, statut: OrderStatus) => void;
-  onAssignLivreur: (orderId: string, livreurId: string) => void;
+  onUpdate: (orderId: string, updates: { statut?: OrderStatus; livreurId?: string }) => void;
 }) => {
   const statuses: OrderStatus[] = ["en_attente", "en_préparation", "assignée", "livrée", "annulée"];
 
+  const [formState, setFormState] = useState({
+    statut: order.statut,
+    livreurId: order.livreur?.id || "",
+  });
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
@@ -25,13 +29,6 @@ const OrderDetailsModal = ({
     }).format(date);
   };
 
-  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onStatusChange(order.id, e.target.value as OrderStatus);
-  };
-
-  const handleLivreurAssign = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onAssignLivreur(order.id, e.target.value);
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20 p-4">
@@ -80,7 +77,13 @@ const OrderDetailsModal = ({
 
               <div>
                 <h3 className="text-sm font-medium text-gray-500 mb-2">Order Management</h3>
-                <div className="card space-y-4">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  onUpdate(order.id, {
+                    statut: formState.statut as OrderStatus,
+                    livreurId: formState.livreurId || undefined, // avoid sending ""
+                  });
+                }} className="bg-white rounded-lg shadow p-6 space-y-4">
                   <div>
                     <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
                       Status
@@ -88,11 +91,13 @@ const OrderDetailsModal = ({
                     <select
                       id="status"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      value={order.statut}
-                      onChange={handleStatusChange}
+                      value={formState.statut}
+                      onChange={(e) => setFormState((prev) => ({ ...prev, statut: e.target.value as OrderStatus }))}
                     >
-                      {statuses.map(status => (
-                        <option key={status} value={status}>{status ? status.replace(/_/g, ' ').charAt(0).toUpperCase() + status.replace(/_/g, ' ').slice(1) : ''}</option>
+                      {statuses.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase())}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -104,17 +109,18 @@ const OrderDetailsModal = ({
                     <select
                       id="livreur"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      value={order.livreur?.id || ''}
-                      onChange={handleLivreurAssign}
+                      value={formState.livreurId}
+                      onChange={(e) => setFormState((prev) => ({ ...prev, livreurId: e.target.value }))}
                     >
                       <option value="">-- Select Livreur --</option>
-                      {availableLivreurs.map(livreur => (
+                      {availableLivreurs.map((livreur) => (
                         <option key={livreur.id} value={livreur.id}>
                           {livreur.nom} ({livreur.téléphone})
                         </option>
                       ))}
                     </select>
                   </div>
+
 
                   <div>
                     <p className="text-sm text-gray-600">
@@ -124,7 +130,9 @@ const OrderDetailsModal = ({
                       Updated: {formatDate(new Date(order.modifié_le))}
                     </p>
                   </div>
-                </div>
+
+                  <button type="submit" className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white">Update</button>
+                </form>
               </div>
             </div>
 
@@ -161,7 +169,7 @@ const OrderDetailsModal = ({
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

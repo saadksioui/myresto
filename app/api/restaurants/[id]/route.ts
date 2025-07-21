@@ -72,6 +72,7 @@ export const GET = apiHandler(async (
       profil: true,
       abonnement: true,
       paiement: true,
+      livreurs: true,
       lieux: {
         include: {
           horaires: true,

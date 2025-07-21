@@ -10,6 +10,7 @@ import OrderDetailsModal from "../_components/orders/OrderDetailsModal"; // Make
 const OrdersPage = () => {
   const [orders, setOrders] = useState<Commande[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [livreurs, setLivreurs] = useState<Livreur[]>([]);
   const { selectedRestaurant } = useRestaurant();
 
   useEffect(() => {
@@ -37,9 +38,23 @@ const OrdersPage = () => {
 
   const selectedOrder = orders.find((o) => o.id === selectedOrderId);
 
-  const availableLivreurs: Livreur[] = orders
-  .map(order => order.livreur)
-  .filter((livreur): livreur is Livreur => !!livreur && livreur.actif);
+  useEffect(() => {
+    const fetchLivreurs = async () => {
+      try {
+        const res = await fetch(`/api/restaurants/${selectedRestaurant}/livreurs`);
+        if (!res.ok) throw new Error("Failed to fetch livreurs");
+
+        const data = await res.json();
+        setLivreurs(data.livreurs); // ✅ match what backend sends
+      } catch (error) {
+        console.error("Failed to fetch livreurs:", error);
+      }
+    };
+
+    fetchLivreurs();
+  }, [selectedRestaurant]);
+
+  const availableLivreurs: Livreur[] = Array.from(livreurs.values());
 
   const handleDragStart = (e: React.DragEvent, orderId: string) => {
     e.dataTransfer.setData("orderId", orderId);
@@ -48,42 +63,40 @@ const OrdersPage = () => {
   const handleDrop = (e: React.DragEvent, targetStatus: OrderStatus) => {
     e.preventDefault();
     const orderId = e.dataTransfer.getData("orderId");
-    handleStatusChange(orderId, targetStatus);
+    handleUpdateOrder(orderId, { statut: targetStatus });
   };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
-  const handleStatusChange = (orderId: string, statut: OrderStatus) => {
+  const handleUpdateOrder = (orderId: string, updates: { statut?: OrderStatus; livreurId?: string }) => {
     setOrders((prev) =>
       prev.map((order) =>
-        order.id === orderId ? { ...order, statut, updatedAt: new Date() } : order
+        order.id === orderId
+          ? {
+            ...order,
+            ...(updates.statut && { statut: updates.statut }),
+            ...(updates.livreurId && { livreur_id: updates.livreurId }),
+            updatedAt: new Date(),
+          }
+          : order
       )
     );
 
-    // Optionally sync to backend
+    // ✅ Ensure we only send non-empty values
     fetch(`/api/restaurants/${selectedRestaurant}/commandes/${orderId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ statut }),
+      body: JSON.stringify({
+        ...(updates.statut && { statut: updates.statut }),
+        ...(updates.livreurId ? { livreur_id: updates.livreurId } : {}),
+      }),
     });
   };
 
-  const handleAssignLivreur = (orderId: string, livreurId: string) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id === orderId) {
-          return {
-            ...order,
-            livreur_id: livreurId,
-            updatedAt: new Date(),
-          };
-        }
-        return order;
-      })
-    );
-  };
+
+
 
   const renderColumn = (
     title: string,
@@ -137,8 +150,7 @@ const OrdersPage = () => {
           order={selectedOrder}
           onClose={() => setSelectedOrderId(null)}
           availableLivreurs={availableLivreurs}
-          onStatusChange={handleStatusChange}
-          onAssignLivreur={handleAssignLivreur}
+          onUpdate={handleUpdateOrder}
         />
       )}
     </div>
