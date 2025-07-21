@@ -1,8 +1,10 @@
 
 const SettingsPage = () => {
   return (
-    <div>
-      SettingsPage
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">General Settings</h3>
+      </div>
     </div>
   )
 };

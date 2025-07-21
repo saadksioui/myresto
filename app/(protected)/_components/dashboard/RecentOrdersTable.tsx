@@ -75,7 +75,7 @@ const RecentOrdersTable = () => {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold">Dernières commandes</h3>
         <Link href={"/orders"}>
-          <button className="text-sm text-primary-600 hover:text-primary-700">
+          <button className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer">
             Voir tout
           </button>
         </Link>
