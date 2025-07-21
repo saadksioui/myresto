@@ -43,7 +43,7 @@ const RevenueChart = () => {
   }
 
   // Prepare data from selected restaurant
-  const commandes: Commande[] = restaurant?.commandes || [];
+  const commandes: Commande[] = restaurant?.commandes?.filter((commande) => commande.statut === "livrée") || [];
 
   // Daily revenue for the last 7 days
   const dailyRevenueData = useMemo(() => {

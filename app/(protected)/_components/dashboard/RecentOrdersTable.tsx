@@ -46,17 +46,17 @@ const RecentOrdersTable = () => {
   const getStatusColor = (statut: string) => {
     switch (statut) {
       case "en_attente":
-        return "badge-warning";
+        return "bg-yellow-100 text-yellow-800";
       case "en_préparation":
-        return "badge-neutral";
+        return "bg-gray-100 text-gray-800";
       case "assignée":
-        return "badge-accent bg-accent-100 text-accent-800";
+        return "bg-[#FFEDD5] text-[#9A3412]";
       case "livrée":
-        return "badge-success";
+        return "bg-green-100 text-green-800";
       case "annulée":
-        return "badge-error";
+        return "bg-red-100 text-red-800";
       default:
-        return "badge-neutral";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -81,36 +81,36 @@ const RecentOrdersTable = () => {
         </Link>
       </div>
 
-      <div className="table-container">
-        <table className="table">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead>
-            <tr>
-              <th>Commande</th>
-              <th>Client</th>
-              <th>Montant</th>
-              <th>Statut</th>
-              <th>Livreur</th>
-              <th>Date</th>
+            <tr className="bg-white even:bg-gray-50">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commande</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Livreur</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {recentOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="font-medium">{order.id}</td>
-                <td>{order.client?.nom || "—"}</td>
-                <td>
+              <tr className="bg-white even:bg-gray-50" key={order.id}>
+                <td className="font-medium px-6 py-4 whitespace-nowrap text-sm">{order.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{order.client?.nom || "—"}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {parseFloat(order.total).toLocaleString()} Dhs
                 </td>
-                <td>
-                  <span className={`badge ${getStatusColor(order.statut)}`}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.statut)}`}>
                     <span className="flex items-center gap-1">
                       {getStatusIcon(order.statut)}
-                      {order.statut}
+                      {order.statut.replace(/_/g, ' ').charAt(0).toUpperCase() + order.statut.replace(/_/g, ' ').slice(1)}
                     </span>
                   </span>
                 </td>
-                <td>{order.livreur?.nom || "—"}</td>
-                <td className="text-gray-500">{formatDate(order.créé_le)}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm">{order.livreur?.nom || "—"}</td>
+                <td className="text-gray-500 px-6 py-4 whitespace-nowrap text-sm">{formatDate(order.créé_le)}</td>
               </tr>
             ))}
           </tbody>

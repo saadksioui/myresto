@@ -18,7 +18,6 @@ export async function middleware(req: NextRequest) {
 
   // Protected routes: check authentication
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  console.log("TOKEN IN MIDDLEWARE:", token);
 
   if (!token) {
     const url = new URL("/auth/signin", req.url);

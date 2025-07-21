@@ -9,6 +9,7 @@ import RecentOrdersTable from "../_components/dashboard/RecentOrdersTable";
 
 interface Commande {
   total: number;
+  statut: string;
   // add other commande fields if needed
 }
 
@@ -46,7 +47,10 @@ const DashboardPage = () => {
   }, [selectedRestaurant]);
   console.log(restaurant);
 
-  const totalRevenue = restaurant?.commandes?.reduce((sum, commande) => sum + commande.total, 0) || 0;
+  const totalRevenue =
+  restaurant?.commandes
+    ?.filter((commande) => commande.statut === "livrée")
+    .reduce((sum, commande) => sum + commande.total, 0) || 0;
   const totalCommandes = restaurant?.commandes?.length || 0;
   const activeMenuItems = restaurant?.menus?.filter(item => item.actif).length || 0;
   const activeLivreurs = restaurant?.livreurs?.filter(livreur => livreur.actif).length || 0;
@@ -84,7 +88,7 @@ const DashboardPage = () => {
 
   // Trends
   const revenueTrend =
-    commandes.reduce((sum, c) => sum + c.total, 0) -
+    commandes?.filter((commande) => commande.statut === "livrée").reduce((sum, c) => sum + c.total, 0) -
     previousCommandes.reduce((sum, c) => sum + c.total, 0);
 
   const commandeTrend = calculateTrend(commandes, previousCommandes);
@@ -110,7 +114,7 @@ const DashboardPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KPICard
           title="Total Revenue"
-          value={`${totalRevenue.toLocaleString()} Dhs`}
+          value={`${Number(totalRevenue).toFixed(2)} Dhs`}
           icon={<DollarSign size={18} className="text-[#2563EB]" />}
           colorClass="text-[#2563EB]"
           trend={revenueTrend}

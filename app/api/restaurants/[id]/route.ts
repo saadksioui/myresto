@@ -68,6 +68,7 @@ export const GET = apiHandler(async (
     where: { id: restaurantId },
     include: {
       menus: true,
+      commandes: true,
       profil: true,
       abonnement: true,
       paiement: true,
