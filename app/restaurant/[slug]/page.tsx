@@ -99,16 +99,17 @@ const RestaurantPage = () => {
 
         const data = await res.json();
         setRestaurant(data.restaurant);
-        setLoading(false);
       } catch (error) {
         console.error("Failed to fetch restaurant:", error);
         setNotFound(true);
+      } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchRestoInfo();
   }, [slug]);
+
 
   const submitOrder = async () => {
     if (!restaurant) return;
