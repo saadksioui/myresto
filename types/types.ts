@@ -1,49 +1,26 @@
 export type OrderStatus = "en_attente" | "en_préparation" | "assignée" | "livrée" | "annulée";
 
-export type RestaurantPublicData = {
-  général: {
-    id: string;
-    nom: string;
-    slug: string;
-    type: string;
-    logo_url: string | null;
-    bannière_url: string | null;
-    min_commande: number | null;
-    whatsapp_commande: string | null;
-    notifications_sonores: boolean;
-  };
-  profil: {
-    description: string;
-    site_web?: string;
-    téléphone?: string;
-    email?: string;
-    // Add more fields based on your schema
-  } | null;
-  paiement: {
-    livraison: boolean;
-    frais_livraison: number;
-    min_commande: number;
-    espèce: boolean;
-    cb: boolean;
-    paypal: boolean;
-  } | null;
-  lieux: {
-    id: string;
-    adresse: string;
-    actif: boolean;
-    horaires: {
-      id: string;
-      jour_semaine: number;
-      ouverture: string;
-      fermeture: string;
-      activé: boolean;
-    }[];
-  }[];
-  abonnement: {
-    id: string;
-    type: string;
-    statut: string;
-    expire_le: string;
-    // Add more fields based on your schema
-  } | null;
-};
+export type GeneralSettings = {
+  nom: string;
+  type: string;
+  logo: string;
+  banniére: string;
+  min_commande: number;
+  whatsapp_commande: boolean;
+}
+
+export type ProfilSettings = {
+  nom_gérant: string;
+  téléphone: string;
+  email: string;
+  langue: string;
+  facebook: string;
+  instagram: string;
+}
+
+export type PaiementSettings = {
+  livraison: boolean;
+  frais_livraison: number;
+  min_commande: number;
+  espèce: boolean;
+}

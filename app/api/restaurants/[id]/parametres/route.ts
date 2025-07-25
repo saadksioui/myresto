@@ -5,6 +5,21 @@ import { checkUserRestaurantAccess } from "@/lib/restaurants";
 import { apiHandler, ApiError } from "@/lib/utils";
 import { schemaPaiement, schemaProfil } from "@/lib/validation";
 import { PERMISSIONS } from "@/lib/rbac";
+import cloudinary from "cloudinary";
+
+cloudinary.v2.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!,
+  api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET!,
+});
+
+async function uploadToCloudinary(file: string, folder: string) {
+  const res = await cloudinary.v2.uploader.upload(file, {
+    folder,
+    resource_type: "image",
+  });
+  return res.secure_url;
+}
 
 // Récupérer tous les paramètres d'un restaurant
 export const GET = apiHandler(async (
@@ -113,11 +128,7 @@ export const PUT = apiHandler(async (
       livraison,
       frais_livraison,
       min_commande,
-      espèce,
-      cb,
-      paypal,
-      email_paypal,
-      clé_api_cb,
+      espèce
     } = validationResult.data;
 
     // Mettre à jour ou créer les paramètres de paiement
@@ -127,22 +138,14 @@ export const PUT = apiHandler(async (
         livraison,
         frais_livraison,
         min_commande,
-        espèce,
-        cb,
-        paypal,
-        email_paypal,
-        clé_api_cb,
+        espèce
       },
       create: {
         restaurant_id: restaurantId,
         livraison,
         frais_livraison,
         min_commande,
-        espèce,
-        cb,
-        paypal,
-        email_paypal,
-        clé_api_cb,
+        espèce
       },
     });
 
@@ -161,8 +164,7 @@ export const PUT = apiHandler(async (
       email,
       langue,
       facebook,
-      instagram,
-      site_web,
+      instagram
     } = validationResult.data;
 
     // Mettre à jour ou créer le profil
@@ -174,8 +176,7 @@ export const PUT = apiHandler(async (
         email,
         langue,
         facebook,
-        instagram,
-        site_web,
+        instagram
       },
       create: {
         restaurant_id: restaurantId,
@@ -184,8 +185,7 @@ export const PUT = apiHandler(async (
         email,
         langue,
         facebook,
-        instagram,
-        site_web,
+        instagram
       },
     });
 
@@ -195,19 +195,24 @@ export const PUT = apiHandler(async (
     const {
       nom,
       type,
+      logo,
+      banniére,
       min_commande,
-      whatsapp_commande,
-      notifications_sonores
+      whatsapp_commande
     } = data;
+
+    const logo_url = await uploadToCloudinary(logo, `restaurants/${restaurantId}/logo`);
+    const bannière_url = await uploadToCloudinary(banniére, `restaurants/${restaurantId}/bannière`);
 
     const restaurant = await prisma.restaurant.update({
       where: { id: restaurantId },
       data: {
         nom,
         type,
+        logo_url,
+        bannière_url,
         min_commande,
-        whatsapp_commande,
-        notifications_sonores,
+        whatsapp_commande
       },
     });
 
