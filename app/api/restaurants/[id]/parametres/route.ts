@@ -21,6 +21,9 @@ async function uploadToCloudinary(file: string, folder: string) {
   return res.secure_url;
 }
 
+const isUrl = (value: string) =>
+  typeof value === "string" && (value.startsWith("http://") || value.startsWith("https://"));
+
 // Récupérer tous les paramètres d'un restaurant
 export const GET = apiHandler(async (
   req: NextRequest,
@@ -114,9 +117,9 @@ export const PUT = apiHandler(async (
   }
 
   const data = await req.json();
-  const type = data.type || "paiement"; // "paiement", "profil", "général"
+  const section = data.section || "paiement"; // "paiement", "profil", "général"
 
-  if (type === "paiement") {
+  if (section === "paiement") {
     // Valider les données
     const validationResult = schemaPaiement.safeParse(data);
 
@@ -150,7 +153,7 @@ export const PUT = apiHandler(async (
     });
 
     return Response.json({ success: true, paiement });
-  } else if (type === "profil") {
+  } else if (section === "profil") {
     // Valider les données
     const validationResult = schemaProfil.safeParse(data);
 
@@ -190,7 +193,7 @@ export const PUT = apiHandler(async (
     });
 
     return Response.json({ success: true, profil });
-  } else if (type === "général") {
+  } else if (section === "général") {
     // Mettre à jour les paramètres généraux du restaurant
     const {
       nom,
@@ -201,8 +204,8 @@ export const PUT = apiHandler(async (
       whatsapp_commande
     } = data;
 
-    const logo_url = await uploadToCloudinary(logo, `restaurants/${restaurantId}/logo`);
-    const bannière_url = await uploadToCloudinary(banniére, `restaurants/${restaurantId}/bannière`);
+    let logo_url = isUrl(logo) ? logo : await uploadToCloudinary(logo, `restaurants/${restaurantId}/logo`);
+    let bannière_url = isUrl(banniére) ? banniére : await uploadToCloudinary(banniére, `restaurants/${restaurantId}/bannière`);
 
     const restaurant = await prisma.restaurant.update({
       where: { id: restaurantId },
