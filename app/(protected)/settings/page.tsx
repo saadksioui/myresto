@@ -101,6 +101,25 @@ const SettingsPage = () => {
     });
   };
 
+  const handleProfilSettingsChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+
+    setProfilSettings((prevSettings) => {
+      if (!prevSettings) return prevSettings;
+
+      return {
+        ...prevSettings,
+        [name]:
+          type === "number"
+            ? parseFloat(value)
+            : value,
+      };
+    });
+  };
+
+
 
   const handleSaveGeneralSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,6 +173,46 @@ const SettingsPage = () => {
       setIsLoading(false);
     }
   };
+
+  const handleSaveProfileSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+
+      const res = await fetch(`/api/restaurants/${selectedRestaurant}/parametres`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section: "profil",
+          nom_gérant: profilSettings?.nom_gérant,
+          téléphone: profilSettings?.téléphone,
+          email: profilSettings?.email,
+          langue: profilSettings?.langue,
+          facebook: profilSettings?.facebook,
+          instagram: profilSettings?.instagram,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setProfilSettings({
+          nom_gérant: data.paramètres.général?.nom_gérant,
+          téléphone: data.paramètres.général?.téléphone,
+          email: data.paramètres.général?.email,
+          langue: data.paramètres.général?.langue,
+          facebook: data.paramètres.général?.facebook,
+          instagram: data.paramètres.général?.instagram,
+        });
+      } else {
+        setError("Failed to save profile settings");
+      }
+    } catch (err) {
+      console.error("Erreur lors de la requête :", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
 
 
@@ -298,6 +357,119 @@ const SettingsPage = () => {
           </form>
         </div >
       </div >
+    ),
+    profile: (
+      <div className="space-y-6">
+        <div className="w-full bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Profil Information</h3>
+
+
+          <form onSubmit={handleSaveProfileSettings}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="nom_gérant" className="block text-sm font-medium text-gray-700 mb-1">
+                  Nom de gérant
+                </label>
+                <input
+                  type="text"
+                  id="nom_gérant"
+                  name="nom_gérant"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profilSettings?.nom_gérant ?? ''}
+                  onChange={handleProfilSettingsChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="téléphone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Numéro de téléphone
+                </label>
+                <input
+                  type="text"
+                  id="téléphone"
+                  name="téléphone"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profilSettings?.téléphone ?? ''}
+                  onChange={handleProfilSettingsChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email de contact
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profilSettings?.email ?? ''}
+                  onChange={handleProfilSettingsChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="langue" className="block text-sm font-medium text-gray-700 mb-1">
+                  Langue de contact
+                </label>
+                <select name="langue" id="langue" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" value={profilSettings?.langue ?? ''} onChange={handleProfilSettingsChange}>
+                  <option value="fr">Français</option>
+                  <option value="en">English</option>
+                  <option value="es">Español</option>
+                  <option value="de">Deutsch</option>
+                  <option value="it">Italiano</option>
+                  <option value="pt">Português</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="facebook" className="block text-sm font-medium text-gray-700 mb-1">
+                  Facebook
+                </label>
+                <input
+                  type="text"
+                  id="facebook"
+                  name="facebook"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profilSettings?.facebook ?? ''}
+                  onChange={handleProfilSettingsChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="instagram" className="block text-sm font-medium text-gray-700 mb-1">
+                  Instagram
+                </label>
+                <input
+                  type="text"
+                  id="instagram"
+                  name="instagram"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={profilSettings?.instagram ?? ''}
+                  onChange={handleProfilSettingsChange}
+                />
+              </div>
+            </div>
+            <div className="w-full flex justify-end mt-5">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white w-fit flex items-center justify-end gap-2"
+              >
+                {
+                  isLoading ? (
+                    <>
+                      <LoaderCircle className="animate-spin" size={20} />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      <span>Save</span>
+                    </>
+                  )
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
     )
   }
 

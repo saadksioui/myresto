@@ -387,7 +387,7 @@ const RestaurantPage = () => {
                 <div className="flex items-center gap-4">
                   <span className="text-gray-600">Suivez-nous:</span>
                   {restaurant?.profil?.facebook && (
-                    <a href={`https://facebook.com/${restaurant?.profil.facebook}`}
+                    <a href={`${restaurant?.profil.facebook}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:text-blue-700">
@@ -395,7 +395,7 @@ const RestaurantPage = () => {
                     </a>
                   )}
                   {restaurant?.profil?.instagram && (
-                    <a href={`https://instagram.com/${restaurant?.profil.instagram}`}
+                    <a href={`${restaurant?.profil.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-pink-600 hover:text-pink-700">
