@@ -1,3 +1,5 @@
+import { Lieu } from "./modelsTypes";
+
 export type OrderStatus = "en_attente" | "en_préparation" | "assignée" | "livrée" | "annulée";
 
 export type GeneralSettings = {
@@ -24,3 +26,15 @@ export type PaiementSettings = {
   min_commande: number;
   espèce: boolean;
 }
+
+export type HoursSettings = {
+  restaurant_id: string;
+  lieu_id: string;
+  lieu: Lieu;
+  jour_semaine: number;       // 0 (Dimanche) - 6 (Samedi)
+  activé: boolean;
+  heure_ouverture: string;    // Format "HH:MM"
+  heure_fermeture: string;    // Format "HH:MM"
+  cree_le: Date;
+  modifie_le: Date;
+};

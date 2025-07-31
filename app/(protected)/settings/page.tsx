@@ -1,10 +1,11 @@
 "use client"
 import { useRestaurant } from "@/context/RestaurantContext";
-import { GeneralSettings, PaiementSettings, ProfilSettings } from "@/types/types";
+import { GeneralSettings, HoursSettings, PaiementSettings, ProfilSettings } from "@/types/types";
 import { Clock, CreditCard, Globe, LoaderCircle, Save, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import Loading from "../loading";
 import Image from "next/image";
+import { getLieu } from "../_actions/getLieu";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -14,6 +15,21 @@ function fileToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+const daysOfWeek = [
+  "Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"
+];
+
+type DisplayHourSetting = {
+  day: string;
+  jour_semaine: number;
+  isOpen: boolean;
+  openTime: string;
+  closeTime: string;
+  lieu_id: string | null;
+};
+
+
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -26,6 +42,70 @@ const SettingsPage = () => {
   const [isLoadingSettings, setIsLoadingSettings] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { selectedRestaurant } = useRestaurant();
+  const [hoursSettings, setHoursSettings] = useState<HoursSettings[]>([]);
+  const [fullHours, setFullHours] = useState<DisplayHourSetting[]>([]);
+
+
+
+
+
+  const handleHoursChange = (
+    index: number,
+    field: 'isOpen' | 'openTime' | 'closeTime',
+    value: boolean | string
+  ) => {
+    setFullHours(prev =>
+      prev.map((day, i) =>
+        i === index ? { ...day, [field]: value } : day
+      )
+    );
+  };
+
+
+
+  useEffect(() => {
+    const fetchHours = async () => {
+      setIsLoading(true);
+      try {
+        if (selectedRestaurant) {
+          const res = await fetch(`/api/restaurants/${selectedRestaurant}/parametres/horaires`);
+          const data = await res.json();
+
+          const fetchedSettings: HoursSettings[] = data.horaires;
+
+          setHoursSettings(fetchedSettings);
+
+          // Convert API data to UI-friendly format
+          const merged = daysOfWeek.map((name, index) => {
+            const existing = fetchedSettings.find(h => h.jour_semaine === index);
+            return {
+              day: name,
+              jour_semaine: index,
+              isOpen: existing?.activé ?? false,
+              openTime: existing?.heure_ouverture ?? "09:00",
+              closeTime: existing?.heure_fermeture ?? "18:00",
+              lieu_id: existing?.lieu_id ?? null,
+            };
+          });
+
+          setFullHours(merged);
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des horaires:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (selectedRestaurant) {
+      fetchHours();
+    }
+  }, [selectedRestaurant]);
+
+
+  console.log(hoursSettings);
+
+
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -210,6 +290,35 @@ const SettingsPage = () => {
     } catch (err) {
       console.error("Erreur lors de la requête :", err);
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleHoursSubmit = async (e: React.FormEvent) => {
+
+    setIsLoading(true);
+    const payload = fullHours.map(day => ({
+      jour_semaine: day.jour_semaine,
+      activé: day.isOpen,
+      heure_ouverture: day.openTime,
+      heure_fermeture: day.closeTime,
+      lieu_id: day.lieu_id
+    }));
+
+    try {
+
+      const res = await fetch(`/api/restaurants/${selectedRestaurant}/parametres/horaires`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ remplacer: true, horaires: payload }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) throw new Error("Erreur lors de la sauvegarde");
+      setIsLoading(false);
+    } catch (err) {
+      console.error(err);
       setIsLoading(false);
     }
   }
@@ -470,7 +579,90 @@ const SettingsPage = () => {
         </div>
 
       </div>
-    )
+    ),
+
+    hours: (
+      <div className="space-y-6">
+        <div className="w-full bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Operating Hours</h3>
+
+          <form onSubmit={handleHoursSubmit} className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-white even:bg-gray-50">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Open</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Close</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fullHours.map((day, index) => (
+                  <tr className="bg-white even:bg-gray-50" key={index}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">{day.day}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`day-${index}`}
+                          checked={day.isOpen}
+                          onChange={(e) => handleHoursChange(index, 'isOpen', e.target.checked)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor={`day-${index}`} className="ml-2 block text-sm text-gray-700">
+                          {day.isOpen ? 'Ouvert' : 'Fermé'}
+                        </label>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <input
+                        type="time"
+                        value={day.openTime}
+                        onChange={(e) => handleHoursChange(index, 'openTime', e.target.value)}
+                        disabled={!day.isOpen}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 py-1"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <input
+                        type="time"
+                        value={day.closeTime}
+                        onChange={(e) => handleHoursChange(index, 'closeTime', e.target.value)}
+                        disabled={!day.isOpen}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 py-1"
+                      />
+                    </td>
+                  </tr>
+                ))}
+
+              </tbody>
+            </table>
+
+            <div className="w-full flex justify-end mt-5">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white w-fit flex items-center justify-end gap-2"
+              >
+                {
+                  isLoading ? (
+                    <>
+                      <LoaderCircle className="animate-spin" size={20} />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      <span>Save</span>
+                    </>
+                  )
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    ),
   }
 
   if (isLoadingSettings) {
