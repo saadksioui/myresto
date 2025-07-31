@@ -103,8 +103,6 @@ const SettingsPage = () => {
   }, [selectedRestaurant]);
 
 
-  console.log(hoursSettings);
-
 
 
   useEffect(() => {
@@ -195,6 +193,24 @@ const SettingsPage = () => {
           type === "number"
             ? parseFloat(value)
             : value,
+      };
+    });
+  };
+
+  const handlePaiementSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+
+    setPaiementSettings((prevSettings) => {
+      if (!prevSettings) return prevSettings; // handle undefined case safely
+
+      return {
+        ...prevSettings,
+        [name]:
+          type === "checkbox"
+            ? checked
+            : type === "number"
+              ? parseFloat(value)
+              : value,
       };
     });
   };
@@ -321,7 +337,42 @@ const SettingsPage = () => {
       console.error(err);
       setIsLoading(false);
     }
-  }
+  };
+
+  const handlePaiementSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/restaurants/${selectedRestaurant}/parametres`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          section: "paiement",
+          livraison: paiementSettings?.livraison,
+          frais_livraison: paiementSettings?.frais_livraison,
+          min_commande: paiementSettings?.min_commande,
+          espèce: paiementSettings?.espèce,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPaiementSettings({
+          livraison: data.paramètres.général?.livraison,
+          frais_livraison: data.paramètres.général?.frais_livraison,
+          min_commande: data.paramètres.général?.min_commande,
+          espèce: data.paramètres.général?.espèce,
+        });
+      } else {
+        setError("Failed to save payment settings");
+      }
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Erreur lors de la requête :", err);
+      setIsLoading(false);
+    }
+  };
 
 
 
@@ -580,7 +631,93 @@ const SettingsPage = () => {
 
       </div>
     ),
+    paiement: (
+      <div className="space-y-6">
+        <div className="w-full bg-white rounded-lg shadow p-6">
+          <h3 className="text-lg font-semibold mb-4">Paiement & Livraison</h3>
 
+          <form onSubmit={handlePaiementSubmit}>
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="livraison"
+                  name="livraison"
+                  checked={paiementSettings?.livraison}
+                  onChange={handlePaiementSettingsChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="livraison" className="ml-2 block text-sm text-gray-700">
+                  Livraison
+                </label>
+              </div>
+              <div>
+                <label htmlFor="frais_livraison" className="block text-sm font-medium text-gray-700 mb-1">
+                  Frais de livraison
+                </label>
+                <input
+                  type="number"
+                  id="frais_livraison"
+                  name="frais_livraison"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={paiementSettings?.frais_livraison ?? ''}
+                  onChange={handlePaiementSettingsChange}
+                />
+              </div>
+              <div>
+                <label htmlFor="min_commande" className="block text-sm font-medium text-gray-700 mb-1">
+                  Minimum de commande
+                </label>
+                <input
+                  type="number"
+                  id="min_commande"
+                  name="min_commande"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={paiementSettings?.min_commande ?? ''}
+                  onChange={handlePaiementSettingsChange}
+                />
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="espèce"
+                  name="espèce"
+                  checked={paiementSettings?.espèce}
+                  onChange={handlePaiementSettingsChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="espèce" className="ml-2 block text-sm text-gray-700">
+                  Espèce
+                </label>
+              </div>
+
+            </div>
+
+            <div className="w-full flex justify-end mt-5">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="px-4 py-2 rounded-lg font-medium transition-colors bg-blue-600 hover:bg-blue-700 text-white w-fit flex items-center justify-end gap-2"
+              >
+                {
+                  isLoading ? (
+                    <>
+                      <LoaderCircle className="animate-spin" size={20} />
+                      <span>Loading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      <span>Save</span>
+                    </>
+                  )
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    ),
     hours: (
       <div className="space-y-6">
         <div className="w-full bg-white rounded-lg shadow p-6">

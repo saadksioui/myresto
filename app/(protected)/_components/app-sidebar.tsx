@@ -19,13 +19,10 @@ import { usePathname } from "next/navigation";
 import CreationProcessForRestaurant from "./CreationProcessForRestaurant";
 import { useRestaurant } from "@/context/RestaurantContext";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { Restaurant } from "@/types/modelsTypes";
 
-interface Restaurant {
-  id: string;
-  nom: string;
-  logo_url: string;
-}
+
 
 const AppSidebar = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -35,6 +32,7 @@ const AppSidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showCreationModal, setShowCreationModal] = useState(false);
   const pathname = usePathname();
+
 
   const isActive = (path: string) => pathname === path;
 
@@ -74,7 +72,7 @@ const AppSidebar = () => {
           <DialogTitle asChild>
             <VisuallyHidden>Add New Restaurant</VisuallyHidden>
           </DialogTitle>
-          <CreationProcessForRestaurant currentStepResto={0}/>
+          <CreationProcessForRestaurant currentStepResto={0} />
         </DialogContent>
       </Dialog>
       {/* Small Sidebar */}
@@ -106,14 +104,18 @@ const AppSidebar = () => {
           </button>
         ))}
 
-        <button className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white"
-          onClick={() => setShowCreationModal(true)}
-        >
-          <Plus size={24} />
-          <div className="absolute left-full ml-3 px-2 py-1 bg-black text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
-            Add Restaurant
-          </div>
-        </button>
+        {
+          restaurants[0]?.abonnement?.type === "premium" && (
+            <button className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-gray-400 transition-all duration-200 group relative hover:bg-blue-500 hover:text-white"
+              onClick={() => setShowCreationModal(true)}
+            >
+              <Plus size={24} />
+              <div className="absolute left-full ml-3 px-2 py-1 bg-black text-white text-sm rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap">
+                Add Restaurant
+              </div>
+            </button>
+          )
+        }
       </div>
 
       {/* Expanded Sidebar */}
@@ -144,11 +146,11 @@ const AppSidebar = () => {
               <p className="text-xs text-gray-500">Restaurant Dashboard</p>
             </div>
             <button
-            onClick={() => signOut({ callbackUrl: "/auth/signin" })}
-            className="mt-4 w-fit p-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition"
-          >
-            <LogOut size={20}/>
-          </button>
+              onClick={() => signOut({ callbackUrl: "/auth/signin" })}
+              className="mt-4 w-fit p-2 rounded-md bg-red-600 text-white font-semibold hover:bg-red-700 transition"
+            >
+              <LogOut size={20} />
+            </button>
           </div>
         </div>
 
