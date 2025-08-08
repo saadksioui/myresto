@@ -9,10 +9,14 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/r/") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
+    pathname.startsWith("/MyRestoLogo.svg") ||
     pathname === "/" ||
     pathname.startsWith("/auth/") ||
     pathname.startsWith("/api/r/") ||
     pathname.startsWith("/restaurant/") ||
+    pathname.startsWith("/contact") ||
+    pathname.startsWith("/api/contact/") ||
+    pathname.startsWith("/api/check-user") ||
     pathname.startsWith("/api/auth/")
   ) {
     return NextResponse.next();
