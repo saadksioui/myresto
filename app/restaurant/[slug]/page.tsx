@@ -295,7 +295,7 @@ const RestaurantPage = () => {
           alt={restaurant?.nom || 'Restaurant Banner'}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="absolute bottom-6 left-6 text-white">
           <div className="flex items-center gap-4 mb-2">
             <Image

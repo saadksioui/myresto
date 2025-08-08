@@ -78,57 +78,59 @@ const Etape3Form = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl flex flex-col gap-6"
-    >
-      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-        Étape 3 : Ajoutez le logo et la bannière de votre restaurant
-      </h2>
-      {error && <div className="text-red-600">{error}</div>}
-
-      <div>
-        <label className="block mb-2 font-medium text-gray-700">Logo</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleLogoChange}
-          className="mb-2"
-        />
-        {previewLogo && (
-          <img
-            src={previewLogo}
-            alt="Aperçu du logo"
-            className="h-20 w-20 object-cover rounded border"
-          />
-        )}
-      </div>
-
-      <div>
-        <label className="block mb-2 font-medium text-gray-700">Bannière</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleBannerChange}
-          className="mb-2"
-        />
-        {previewBanner && (
-          <img
-            src={previewBanner}
-            alt="Aperçu de la bannière"
-            className="h-24 w-full object-cover rounded border"
-          />
-        )}
-      </div>
-
-      <button
-        type="submit"
-        className="px-6 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200"
-        disabled={loading}
+    <div>
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded-lg shadow-md w-full max-w-xl flex flex-col gap-6"
       >
-        {loading ? "Enregistrement..." : "Enregistrer les images"}
-      </button>
-    </form>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+          Étape 3 : Ajoutez le logo et la bannière de votre restaurant
+        </h2>
+        {error && <div className="text-red-600">{error}</div>}
+
+        <div>
+          <label className="block mb-2 font-medium text-gray-700">Logo</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleLogoChange}
+            className="mb-2"
+          />
+          {previewLogo && (
+            <img
+              src={previewLogo}
+              alt="Aperçu du logo"
+              className="h-20 w-20 object-cover rounded border"
+            />
+          )}
+        </div>
+
+        <div>
+          <label className="block mb-2 font-medium text-gray-700">Bannière</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleBannerChange}
+            className="mb-2"
+          />
+          {previewBanner && (
+            <img
+              src={previewBanner}
+              alt="Aperçu de la bannière"
+              className="h-24 w-full object-cover rounded border"
+            />
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="px-6 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200"
+          disabled={loading}
+        >
+          {loading ? "Enregistrement..." : "Enregistrer les images"}
+        </button>
+      </form>
+    </div>
   );
 };
 

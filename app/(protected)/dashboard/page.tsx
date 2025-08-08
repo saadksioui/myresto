@@ -2,11 +2,13 @@
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import Etape1Form from "../_components/forms/first-restaurant-forms/Etape1Form";
 import Etape2Form from "../_components/forms/first-restaurant-forms/Etape2Form";
 import Etape3Form from "../_components/forms/first-restaurant-forms/Etape3Form";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import DashboardPage from "./DashboardPage";
 
 type Restaurant = {
@@ -52,6 +54,9 @@ const Dashboard = () => {
     <>
       {!loading && restaurant && step === 1 && (
         <Dialog open>
+          <DialogTitle asChild>
+            <VisuallyHidden>Add New Restaurant</VisuallyHidden>
+          </DialogTitle>
           <DialogContent>
             <Etape1Form
               restaurantId={restaurant.id}
@@ -63,6 +68,9 @@ const Dashboard = () => {
 
       {!loading && restaurant && step === 2 && (
         <Dialog open>
+          <DialogTitle asChild>
+            <VisuallyHidden>Add New Restaurant</VisuallyHidden>
+          </DialogTitle>
           <DialogContent>
             <Etape2Form
               restaurantId={restaurant.id}
@@ -74,6 +82,9 @@ const Dashboard = () => {
 
       {!loading && restaurant && step === 3 && (
         <Dialog open>
+          <DialogTitle asChild>
+            <VisuallyHidden>Add New Restaurant</VisuallyHidden>
+          </DialogTitle>
           <DialogContent>
             <Etape3Form
               restaurantId={restaurant.id}
