@@ -14,6 +14,38 @@ const LivreursPage = () => {
   const [loading, setLoading] = useState(false);
   const { selectedRestaurant } = useRestaurant();
 
+  const handleToggleStatus = async (livreurID: string) => {
+    const updatedLivreurs = livreurs?.map(livreur => {
+      if (livreur.id === livreurID) {
+        return { ...livreur, actif: !livreur.actif };
+      }
+      return livreur;
+    });
+    try {
+      await fetch(`/api/restaurants/${selectedRestaurant}/livreurs/${livreurID}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ actif: updatedLivreurs?.find(livreur => livreur.id === livreurID)?.actif }),
+      });
+    } catch (err) {
+      console.error("Failed to update livreur status", err);
+    }
+    setLivreurs(updatedLivreurs);
+  }
+
+  const handleDeleteLivreur = async (livreurID: string) => {
+    try {
+      await fetch(`/api/restaurants/${selectedRestaurant}/livreurs/${livreurID}`, {
+        method: "DELETE",
+      });
+    } catch (err) {
+      console.error("Failed to delete livreur", err);
+    }
+    setLivreurs(livreurs?.filter(livreur => livreur.id !== livreurID));
+  }
+
   useEffect(() => {
     const fetchLivreur = async () => {
       if (!selectedRestaurant) return;
@@ -127,9 +159,8 @@ const LivreursPage = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">{livreur.téléphone}</td>
                     {/* <td>{livreur.vehicleType || '—'}</td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        livreur.actif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${livreur.actif ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
                         {livreur.actif ? 'Active' : 'Inactive'}
                       </span>
                     </td>
@@ -147,7 +178,7 @@ const LivreursPage = () => {
                         </button>
 
                         <button
-                          /* onClick={() => handleDeleteLivreur(livreur.id)} */
+                          onClick={() => handleDeleteLivreur(livreur.id)}
                           className="text-gray-600 hover:text-error-500 transition-colors"
                           title="Delete livreur"
                         >
@@ -155,10 +186,9 @@ const LivreursPage = () => {
                         </button>
 
                         <button
-                          /* onClick={() => handleToggleStatus(livreur.id)} */
-                          className={`${
-                            livreur.actif ? 'text-success-500' : 'text-gray-400'
-                          } hover:text-primary-600 transition-colors`}
+                          onClick={() => handleToggleStatus(livreur.id)}
+                          className={`${livreur.actif ? 'text-success-500' : 'text-gray-400'
+                            } hover:text-primary-600 transition-colors`}
                           title={livreur.actif ? 'Set as inactive' : 'Set as active'}
                         >
                           {livreur.actif ? (

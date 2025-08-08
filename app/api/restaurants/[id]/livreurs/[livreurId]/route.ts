@@ -109,6 +109,29 @@ export const PUT = apiHandler(async (
   return Response.json({ success: true, livreur });
 })
 
+export const PATCH = apiHandler(async (
+  req: NextRequest,
+  { params }: { params: { id: string, livreurId: string } }
+) =>{
+  const token = await getToken({ req });
+    if (!token) throw new ApiError("Non authentifié", 401);
+
+    const userId = token.id as string;
+    const { id: restaurantId, livreurId } = params;
+
+    const access = await checkUserRestaurantAccess(userId, restaurantId);
+    if (!access.hasAccess) throw new ApiError("Accès refusé", 403);
+
+    const { actif } = await req.json();
+
+    const updated = await prisma.livreur.update({
+      where: { id: livreurId },
+      data: { actif },
+    });
+
+    return Response.json({ success: true, livreur: updated });
+})
+
 // Supprimer un livreur
 export const DELETE = apiHandler(async (
   req: NextRequest,
